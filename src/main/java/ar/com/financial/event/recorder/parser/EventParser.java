@@ -10,6 +10,16 @@ import java.util.Date;
 
 public class EventParser {
 
+    public static void main(final String[] args) {
+        final String data = "10:54:44 07/24/17|0|192.168.7.54|1|1.3.6.1.4.1.18494.2|6|1|1.3.6.1.4.1.18494.2.1.1|String|saasbarv7|1.3.6.1.4.1.18494.2.1.2|String|24/07/2017|1.3.6.1.4.1.18494.2.1.3|String|10:54:30|1.3.6.1.4.1.18494.2.1.4|String|SIS|1.3.6.1.4.1.18494.2.1.5|Integer|8065|1.3.6.1.4.1.18494.2.1.6|String|Info|1.3.6.1.4.1.18494.2.1.7|String|Message|1.3.6.1.4.1.18494.2.1.8|String|FIN Message acked|1.3.6.1.4.1.18494.2.1.9|String|Message UMID IBFOFNL2RXXX9400000000000001273, Suffix 170722452382: acked by SWIFT. Session 4363, ISN 86798\n" +
+                "Ack received: {1:F21MARIARBAAXXX4363086798}{4:{177:1707241054}{451:0}}|";
+
+        EventParser parser = new EventParser();
+        Event event = parser.parse(data);
+
+        System.out.println(event);
+    }
+
     public Event parse(final String data) {
         Validate.notBlank(data, "The event cannot be blank");
         final String event = prepare(data);
@@ -106,7 +116,7 @@ public class EventParser {
         final String messageData = event.split("\\|")[33];
         if (!messageData.contains("Quit")) {
             final String sequenceData = messageData.split(",")[2].trim();
-            int sequenceEnd = sequenceData.indexOf('.') != -1 ? sequenceData.indexOf('.') : sequenceData.indexOf('\n');
+            int sequenceEnd = sequenceData.indexOf('.') != -1 ? sequenceData.indexOf('.') : sequenceData.indexOf(System.lineSeparator());
             return Long.parseLong(sequenceData.substring(4, sequenceEnd));
         } else {
             return null;
