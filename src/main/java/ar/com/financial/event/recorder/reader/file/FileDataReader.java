@@ -19,8 +19,7 @@ public class FileDataReader implements Reader<String> {
 
     public void open() {
         try {
-            ClassLoader classLoader = getClass().getClassLoader();
-            File file = new File(classLoader.getResource(fileName).getFile());
+            File file = new File(fileName);
             Scanner scanner = new Scanner(file);
             scanner.useDelimiter(Pattern.compile("}\\|"));
             this.scanner = scanner;

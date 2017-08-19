@@ -5,7 +5,6 @@ import ar.com.financial.event.recorder.reader.Reader;
 import ar.com.financial.event.recorder.reader.file.FileEventReader;
 import ar.com.financial.event.recorder.writer.Writer;
 import ar.com.financial.event.recorder.writer.console.ConsoleEventWriter;
-import ar.com.financial.event.recorder.writer.database.DatabaseWriter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,13 +15,13 @@ public class EventRecorderConfiguration {
     @Bean
     @Qualifier("reader")
     public Reader<Event> createEventReader() {
-        return new FileEventReader("event-log.txt");
+        return new FileEventReader("config/event-log.txt");
     }
 
     @Bean
     @Qualifier("writer")
     public Writer<Event> createEventWriter() {
-        return new DatabaseWriter();
+        return new ConsoleEventWriter();
     }
 
     @Bean(initMethod = "start", destroyMethod = "stop")

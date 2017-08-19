@@ -3,6 +3,7 @@ package ar.com.financial.event.recorder.reader.file;
 import ar.com.financial.event.recorder.domain.Event;
 import ar.com.financial.event.recorder.parser.EventParser;
 import ar.com.financial.event.recorder.reader.Reader;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 public class FileEventReader implements Reader<Event> {
@@ -33,7 +34,11 @@ public class FileEventReader implements Reader<Event> {
 
     @Override
     public Event read() {
-        return parser.parse(file.read());
+        String data = file.read();
+        if (StringUtils.isBlank(data)) {
+            return null;
+        }
+        return parser.parse(data);
     }
 
 }

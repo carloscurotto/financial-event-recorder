@@ -10,17 +10,6 @@ import java.util.Date;
 
 public class EventParser {
 
-    public static void main(final String[] args) {
-        final String data = "\n" +
-                "\n" +
-                "21:00:20 07/24/17|0|192.168.7.54|1|1.3.6.1.4.1.18494.2|6|1|1.3.6.1.4.1.18494.2.1.1|String|saasbarv7|1.3.6.1.4.1.18494.2.1.2|String|24/07/2017|1.3.6.1.4.1.18494.2.1.3|String|21:00:06|1.3.6.1.4.1.18494.2.1.4|String|SIS|1.3.6.1.4.1.18494.2.1.5|Integer|8061|1.3.6.1.4.1.18494.2.1.6|String|Info|1.3.6.1.4.1.18494.2.1.7|String|Communication|1.3.6.1.4.1.18494.2.1.8|String|Quit ACK Received|1.3.6.1.4.1.18494.2.1.9|String|Message UMID IXXXXXXXXXXX05, Suffix 170724452499: Quit ACK received: {1:F25MARIARBAAXXX4363086810}{4:{331:436317072406011707242100000000013000058086798086810113504113561}";
-
-        EventParser parser = new EventParser();
-        Event event = parser.parse(data);
-
-        System.out.println(event);
-    }
-
     public Event parse(final String data) {
         Validate.notBlank(data, "The event cannot be blank");
         final String event = prepare(data);
