@@ -31,13 +31,21 @@ writer-type=console
 ## Complete commands to run are:
 
 #### Read from file and write to console
+```
 java -jar target/financial-event-recorder.jar
+```
 
 #### Read from file and write to database
+```
 java -Dwriter-type=database -jar target/financial-event-recorder.jar
+```
 
 #### Read from snmp and write to console
+```
 java -Dreader-type=snmp -jar target/financial-event-recorder.jar
+```
 
 #### Read from snmp and write to database
+```
 java -Dreader-type=snmp -Dwriter-type=database -jar target/financial-event-recorder.jar
+```
