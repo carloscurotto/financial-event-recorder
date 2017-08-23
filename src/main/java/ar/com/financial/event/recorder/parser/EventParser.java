@@ -1,12 +1,15 @@
 package ar.com.financial.event.recorder.parser;
 
 import ar.com.financial.event.recorder.domain.Event;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class EventParser {
 
@@ -25,13 +28,13 @@ public class EventParser {
         final String event = prepare(data);
         final Date arrivalTime = extractArrivalTime(event);
         final Date originTime = extractOriginTime(event);
-        final int code = extractCode(event);
+        final String code = extractCode(event);
         final String inputOutput = extractInputOutput(event);
         final String remoteBic = extractRemoteBic(event);
         final String type = extractType(event);
         final long suffix = extractSuffix(event);
-        final Long session = extractSession(event);
-        final Long sequence = extractSequence(event);
+        final String session = extractSession(event);
+        final String sequence = extractSequence(event);
         final String localBic = extractLocalBic(event);
         return new Event(arrivalTime, originTime, code, inputOutput, remoteBic, type, suffix, session, sequence, localBic);
     }
@@ -62,9 +65,13 @@ public class EventParser {
         }
     }
 
-    private int extractCode(final String event) {
+    private String extractCode(final String event) {
         final String codeData = event.split("\\|")[21];
-        return Integer.parseInt(codeData);
+        if (StringUtils.isNotBlank(codeData)) {
+            return codeData.trim();
+        } else {
+            return StringUtils.EMPTY;
+        }
     }
 
     private String extractInputOutput(final String event) {
@@ -80,18 +87,13 @@ public class EventParser {
     }
 
     private String extractType(final String event) {
-        try {
-            final String messageData = event.split("\\|")[33];
-            final String umidData = messageData.split(" ")[2].replace(",", "").trim();
-            final String type = umidData.substring(umidData.lastIndexOf("X") + 1, umidData.length());
-            /*
-            if (type == null || type.trim().equals("")) {
-                System.out.println("blank type");
-            }
-            */
-            return type;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        final String messageData = event.split("\\|")[33];
+        Pattern pattern = Pattern.compile("(.+UMID )(.{12})([0-9]{1,3})");
+        Matcher matcher = pattern.matcher(messageData);
+        if (matcher.find()) {
+            return matcher.group(3);
+        } else {
+            return null;
         }
     }
 
@@ -101,25 +103,46 @@ public class EventParser {
         return Long.parseLong(suffixData.substring(7, suffixData.indexOf(':')));
     }
 
-    private Long extractSession(final String event) {
+    private String extractSession(final String event) {
         final String messageData = event.split("\\|")[33];
         final String suffixData = messageData.split(",")[1].trim();
         if (!suffixData.contains("Quit")) {
             final String sessionData = suffixData.split("\\.")[1].trim();
-            return Long.parseLong(sessionData.substring(8, sessionData.length()));
+            if (StringUtils.isNotBlank(sessionData)) {
+                return sessionData.substring(8, sessionData.length()).trim();
+            } else {
+                return StringUtils.EMPTY;
+            }
         } else {
-            return null;
+            Pattern pattern = Pattern.compile("(\\{1:.{15})([0-9]{4})");
+            Matcher matcher = pattern.matcher(messageData);
+            if (matcher.find()) {
+                return matcher.group(2);
+            } else {
+                return null;
+            }
         }
     }
 
-    private Long extractSequence(final String event) {
+    private String extractSequence(final String event) {
         final String messageData = event.split("\\|")[33];
         if (!messageData.contains("Quit")) {
             final String sequenceData = messageData.split(",")[2].trim();
-            int sequenceEnd = sequenceData.indexOf('.') != -1 ? sequenceData.indexOf('.') : sequenceData.indexOf(System.lineSeparator());
-            return Long.parseLong(sequenceData.substring(4, sequenceEnd));
+            if (StringUtils.isNotBlank(sequenceData)) {
+                int sequenceEnd = sequenceData.indexOf('.') != -1 ?
+                        sequenceData.indexOf('.') : sequenceData.indexOf(System.lineSeparator());
+                return sequenceData.substring(4, sequenceEnd).trim();
+            } else {
+                return StringUtils.EMPTY;
+            }
         } else {
-            return null;
+            Pattern pattern = Pattern.compile("(\\{1:.{15})([0-9]{4})([0-9]{6})");
+            Matcher matcher = pattern.matcher(messageData);
+            if (matcher.find()) {
+                return matcher.group(3);
+            } else {
+                return null;
+            }
         }
     }
 

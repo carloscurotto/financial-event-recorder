@@ -15,13 +15,13 @@ public class Event {
     private int id;
     private Date arrivalTime;
     private Date originTime;
-    private int code;
+    private String code;
     private String inputOutput;
     private String remoteBic;
     private String type;
     private long suffix;
-    private Long session;
-    private Long sequence;
+    private String session;
+    private String sequence;
     private String localBic;
 
     /**
@@ -32,13 +32,13 @@ public class Event {
 
     public Event(final Date arrivalTime,
                  final Date originTime,
-                 final int code,
+                 final String code,
                  final String inputOutput,
                  final String remoteBic,
                  final String type,
                  final long suffix,
-                 final Long session,
-                 final Long sequence,
+                 final String session,
+                 final String sequence,
                  final String localBic) {
         Validate.notNull(arrivalTime, "The arrival time cannot be null");
         Validate.notNull(originTime, "The origin time cannot be null");
@@ -81,11 +81,11 @@ public class Event {
         this.originTime = originTime;
     }
 
-    public int getCode() {
+    public String getCode() {
         return code;
     }
 
-    public void setCode(final int code) {
+    public void setCode(final String code) {
         this.code = code;
     }
 
@@ -121,19 +121,19 @@ public class Event {
         this.suffix = suffix;
     }
 
-    public Long getSession() {
+    public String getSession() {
         return session;
     }
 
-    public void setSession(final Long session) {
+    public void setSession(final String session) {
         this.session = session;
     }
 
-    public Long getSequence() {
+    public String getSequence() {
         return sequence;
     }
 
-    public void setSequence(final Long sequence) {
+    public void setSequence(final String sequence) {
         this.sequence = sequence;
     }
 
