@@ -8,38 +8,39 @@ import javax.persistence.Id;
 import java.util.Date;
 
 @Entity
-public class Event {
+public class SimpleEvent {
 
     @Id
     @GeneratedValue
     private int id;
+
     private Date arrivalTime;
     private Date originTime;
     private String code;
     private String inputOutput;
     private String remoteBic;
     private String type;
-    private long suffix;
+    private String suffix;
     private String session;
     private String sequence;
     private String localBic;
 
     /**
-     * Do not use, persistence only.
+     * Do not use, framework usage only.
      */
     @Deprecated
-    public Event() {}
+    public SimpleEvent() {}
 
-    public Event(final Date arrivalTime,
-                 final Date originTime,
-                 final String code,
-                 final String inputOutput,
-                 final String remoteBic,
-                 final String type,
-                 final long suffix,
-                 final String session,
-                 final String sequence,
-                 final String localBic) {
+    public SimpleEvent(final Date arrivalTime,
+                       final Date originTime,
+                       final String code,
+                       final String inputOutput,
+                       final String remoteBic,
+                       final String type,
+                       final String suffix,
+                       final String session,
+                       final String sequence,
+                       final String localBic) {
         Validate.notNull(arrivalTime, "The arrival time cannot be null");
         Validate.notNull(originTime, "The origin time cannot be null");
         Validate.notNull(inputOutput, "The intput output cannot be null");
@@ -69,7 +70,7 @@ public class Event {
         return arrivalTime;
     }
 
-    public void setArrivalTime(final Date arrivalTime) {
+    public void setArrivalTime(Date arrivalTime) {
         this.arrivalTime = arrivalTime;
     }
 
@@ -77,7 +78,7 @@ public class Event {
         return originTime;
     }
 
-    public void setOriginTime(final Date originTime) {
+    public void setOriginTime(Date originTime) {
         this.originTime = originTime;
     }
 
@@ -85,7 +86,7 @@ public class Event {
         return code;
     }
 
-    public void setCode(final String code) {
+    public void setCode(String code) {
         this.code = code;
     }
 
@@ -93,7 +94,7 @@ public class Event {
         return inputOutput;
     }
 
-    public void setInputOutput(final String inputOutput) {
+    public void setInputOutput(String inputOutput) {
         this.inputOutput = inputOutput;
     }
 
@@ -101,7 +102,7 @@ public class Event {
         return remoteBic;
     }
 
-    public void setRemoteBic(final String remoteBic) {
+    public void setRemoteBic(String remoteBic) {
         this.remoteBic = remoteBic;
     }
 
@@ -109,15 +110,15 @@ public class Event {
         return type;
     }
 
-    public void setType(final String type) {
+    public void setType(String type) {
         this.type = type;
     }
 
-    public long getSuffix() {
+    public String getSuffix() {
         return suffix;
     }
 
-    public void setSuffix(final long suffix) {
+    public void setSuffix(String suffix) {
         this.suffix = suffix;
     }
 
@@ -125,7 +126,7 @@ public class Event {
         return session;
     }
 
-    public void setSession(final String session) {
+    public void setSession(String session) {
         this.session = session;
     }
 
@@ -133,7 +134,7 @@ public class Event {
         return sequence;
     }
 
-    public void setSequence(final String sequence) {
+    public void setSequence(String sequence) {
         this.sequence = sequence;
     }
 
@@ -141,22 +142,23 @@ public class Event {
         return localBic;
     }
 
-    public void setLocalBic(final String localBic) {
+    public void setLocalBic(String localBic) {
         this.localBic = localBic;
     }
 
     @Override
     public String toString() {
-        return "Event{" +
-                "arrivalTime=" + arrivalTime +
+        return "SimpleEvent{" +
+                "id=" + id +
+                ", arrivalTime=" + arrivalTime +
                 ", originTime=" + originTime +
-                ", code=" + code +
+                ", code='" + code + '\'' +
                 ", inputOutput='" + inputOutput + '\'' +
                 ", remoteBic='" + remoteBic + '\'' +
-                ", type=" + type +
-                ", suffix=" + suffix +
-                ", session=" + session +
-                ", sequence=" + sequence +
+                ", type='" + type + '\'' +
+                ", suffix='" + suffix + '\'' +
+                ", session='" + session + '\'' +
+                ", sequence='" + sequence + '\'' +
                 ", localBic='" + localBic + '\'' +
                 '}';
     }

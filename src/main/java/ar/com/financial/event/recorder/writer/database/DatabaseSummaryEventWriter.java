@@ -1,15 +1,15 @@
 package ar.com.financial.event.recorder.writer.database;
 
-import ar.com.financial.event.recorder.domain.Event;
+import ar.com.financial.event.recorder.domain.RawEvent;
 import ar.com.financial.event.recorder.writer.Writer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DatabaseWriter implements Writer<Event> {
+public class DatabaseSummaryEventWriter implements Writer<RawEvent> {
 
     @Autowired
-    private EventRepository eventRepository;
+    private SummaryEventRepository summaryRepository;
 
     @Override
     public void open() {
@@ -20,8 +20,10 @@ public class DatabaseWriter implements Writer<Event> {
     }
 
     @Override
-    public void write(final Event event) {
-        eventRepository.save(event);
+    public void write(final RawEvent event) {
+        if (event.isSummary()) {
+            summaryRepository.save(event.toSummary());
+        }
     }
 
 }

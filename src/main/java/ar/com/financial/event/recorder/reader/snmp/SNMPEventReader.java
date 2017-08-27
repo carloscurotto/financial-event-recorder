@@ -1,9 +1,9 @@
 package ar.com.financial.event.recorder.reader.snmp;
 
-import ar.com.financial.event.recorder.domain.Event;
+import ar.com.financial.event.recorder.domain.RawEvent;
 import ar.com.financial.event.recorder.reader.Reader;
 
-public class SNMPEventReader implements Reader<Event> {
+public class SNMPEventReader implements Reader<RawEvent> {
 
     @Override
     public void open() {
@@ -21,7 +21,7 @@ public class SNMPEventReader implements Reader<Event> {
     }
 
     @Override
-    public Event read() {
+    public RawEvent read() {
         //TODO read from the SNMP socket
         return null;
     }

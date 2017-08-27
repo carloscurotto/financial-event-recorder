@@ -1,6 +1,6 @@
 package ar.com.financial.event.recorder;
 
-import ar.com.financial.event.recorder.domain.Event;
+import ar.com.financial.event.recorder.domain.RawEvent;
 import ar.com.financial.event.recorder.reader.Reader;
 import ar.com.financial.event.recorder.writer.Writer;
 import org.apache.commons.lang3.Validate;
@@ -8,8 +8,8 @@ import org.apache.commons.lang3.Validate;
 public class EventRecorder {
 
     private volatile boolean started = false;
-    private Reader<Event> eventReader;
-    private Writer<Event> eventWriter;
+    private Reader<RawEvent> eventReader;
+    private Writer<RawEvent> eventWriter;
 
     public EventRecorder(final Reader eventReader, final Writer eventWriter) {
         Validate.notNull(eventReader, "The event reader cannot be null");
@@ -61,7 +61,7 @@ public class EventRecorder {
 
     private void run() {
         while (isStarted() && hasNext()) {
-            Event event = readEvent();
+            RawEvent event = readEvent();
             if (event != null) {
                 writeEvent(event);
             }
@@ -72,11 +72,11 @@ public class EventRecorder {
         return eventReader.hasNext();
     }
 
-    private Event readEvent() {
+    private RawEvent readEvent() {
         return eventReader.read();
     }
 
-    private void writeEvent(final Event event) {
+    private void writeEvent(final RawEvent event) {
         eventWriter.write(event);
     }
 

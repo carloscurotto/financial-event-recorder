@@ -1,6 +1,6 @@
 package ar.com.financial.event.recorder.parser;
 
-import ar.com.financial.event.recorder.domain.Event;
+import ar.com.financial.event.recorder.domain.RawEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -14,16 +14,15 @@ import java.util.regex.Pattern;
 public class EventParser {
 
     public static void main(final String[] args) {
-        final String data = "10:54:44 07/24/17|0|192.168.7.54|1|1.3.6.1.4.1.18494.2|6|1|1.3.6.1.4.1.18494.2.1.1|String|saasbarv7|1.3.6.1.4.1.18494.2.1.2|String|24/07/2017|1.3.6.1.4.1.18494.2.1.3|String|10:54:30|1.3.6.1.4.1.18494.2.1.4|String|SIS|1.3.6.1.4.1.18494.2.1.5|Integer|8065|1.3.6.1.4.1.18494.2.1.6|String|Info|1.3.6.1.4.1.18494.2.1.7|String|Message|1.3.6.1.4.1.18494.2.1.8|String|FIN Message acked|1.3.6.1.4.1.18494.2.1.9|String|Message UMID IBFOFNL2RXXX9400000000000001273, Suffix 170722452382: acked by SWIFT. Session 4363, ISN 86798\n" +
-                "Ack received: {1:F21MARIARBAAXXX4363086798}{4:{177:1707241054}{451:0}}|";
+        final String data = "21:00:20 07/24/17|0|192.168.7.54|1|1.3.6.1.4.1.18494.2|6|1|1.3.6.1.4.1.18494.2.1.1|String|saasbarv7|1.3.6.1.4.1.18494.2.1.2|String|24/07/2017|1.3.6.1.4.1.18494.2.1.3|String|21:00:06|1.3.6.1.4.1.18494.2.1.4|String|SIS|1.3.6.1.4.1.18494.2.1.5|Integer|8061|1.3.6.1.4.1.18494.2.1.6|String|Info|1.3.6.1.4.1.18494.2.1.7|String|Communication|1.3.6.1.4.1.18494.2.1.8|String|Quit ACK Received|1.3.6.1.4.1.18494.2.1.9|String|Message UMID IXXXXXXXXXXX05, Suffix 170724452499: Quit ACK received: {1:F25MARIARBAAXXX4363086810}{4:{331:436317072406011707242100000000013000058086798086810113504113561}}|";
 
         EventParser parser = new EventParser();
-        Event event = parser.parse(data);
+        RawEvent event = parser.parse(data);
 
         System.out.println(event);
     }
 
-    public Event parse(final String data) {
+    public RawEvent parse(final String data) {
         Validate.notBlank(data, "The event cannot be blank");
         final String event = prepare(data);
         final Date arrivalTime = extractArrivalTime(event);
@@ -32,11 +31,21 @@ public class EventParser {
         final String inputOutput = extractInputOutput(event);
         final String remoteBic = extractRemoteBic(event);
         final String type = extractType(event);
-        final long suffix = extractSuffix(event);
+        final String suffix = extractSuffix(event);
         final String session = extractSession(event);
         final String sequence = extractSequence(event);
         final String localBic = extractLocalBic(event);
-        return new Event(arrivalTime, originTime, code, inputOutput, remoteBic, type, suffix, session, sequence, localBic);
+        final Date startSessionTime = extractStartSessionTime(event);
+        final Date endSessionTime = extractEndSessionTime(event);
+        final String quantityMessagesSent = extractQuantityMessagesSent(event);
+        final String quantityMessagesReceived = extractQuantityMessagesReceived(event);
+        final String firstMessageSentSequence = extractFirstMessageSentSequence(event);
+        final String lastMessageSentSequence = extractLastMessageSentSequence(event);;
+        final String firstMessageReceivedSequence = extractFirstMessageReceivedSequence(event);
+        final String lastMessageReceivedSequence = extractLastMessageReceivedSequence(event);
+        return new RawEvent(arrivalTime, originTime, code, inputOutput, remoteBic, type, suffix, session, sequence,
+                localBic, startSessionTime, endSessionTime, quantityMessagesSent, quantityMessagesReceived,
+                firstMessageSentSequence, lastMessageSentSequence, firstMessageReceivedSequence, lastMessageReceivedSequence);
     }
 
     private String prepare(String data) {
@@ -97,10 +106,15 @@ public class EventParser {
         }
     }
 
-    private long extractSuffix(final String event) {
+    private String extractSuffix(final String event) {
         final String messageData = event.split("\\|")[33];
         final String suffixData = messageData.split(",")[1].trim();
-        return Long.parseLong(suffixData.substring(7, suffixData.indexOf(':')));
+        final String suffix = suffixData.substring(7, suffixData.indexOf(':'));
+        if (StringUtils.isNotBlank(suffix)) {
+            return suffix.trim();
+        } else {
+            return StringUtils.EMPTY;
+        }
     }
 
     private String extractSession(final String event) {
@@ -151,6 +165,98 @@ public class EventParser {
         final int startIndex = messageData.indexOf('{') + 6;
         final int endIndex = startIndex + 8;
         return messageData.substring(startIndex, endIndex);
+    }
+
+    private Date extractStartSessionTime(final String event) {
+        try {
+            Pattern pattern = Pattern.compile("(\\{331:.{4})([0-9]{10})");
+            Matcher matcher = pattern.matcher(event);
+            if (matcher.find()) {
+                final String startSessionTimeData = matcher.group(2);
+                final DateFormat formatter = new SimpleDateFormat("yyMMddHHmm");
+                return formatter.parse(startSessionTimeData);
+            } else {
+                return null;
+            }
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Date extractEndSessionTime(final String event) {
+        try {
+            Pattern pattern = Pattern.compile("(\\{331:.{14})([0-9]{10})");
+            Matcher matcher = pattern.matcher(event);
+            if (matcher.find()) {
+                final String endSessionTimeData = matcher.group(2);
+                final DateFormat formatter = new SimpleDateFormat("yyMMddHHmm");
+                return formatter.parse(endSessionTimeData);
+            } else {
+                return null;
+            }
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String extractQuantityMessagesSent(final String event) {
+        Pattern pattern = Pattern.compile("(\\{331:.{27})([0-9]{6})");
+        Matcher matcher = pattern.matcher(event);
+        if (matcher.find()) {
+            return matcher.group(2);
+        } else {
+            return null;
+        }
+    }
+
+    private String extractQuantityMessagesReceived(final String event) {
+        Pattern pattern = Pattern.compile("(\\{331:.{33})([0-9]{6})");
+        Matcher matcher = pattern.matcher(event);
+        if (matcher.find()) {
+            return matcher.group(2);
+        } else {
+            return null;
+        }
+    }
+
+    private String extractFirstMessageSentSequence(final String event) {
+        Pattern pattern = Pattern.compile("(\\{331:.{39})([0-9]{6})");
+        Matcher matcher = pattern.matcher(event);
+        if (matcher.find()) {
+            return matcher.group(2);
+        } else {
+            return null;
+        }
+    }
+
+    private String extractLastMessageSentSequence(final String event) {
+        Pattern pattern = Pattern.compile("(\\{331:.{45})([0-9]{6})");
+        Matcher matcher = pattern.matcher(event);
+        if (matcher.find()) {
+            return matcher.group(2);
+        } else {
+            return null;
+        }
+    }
+
+    private String extractFirstMessageReceivedSequence(final String event) {
+        Pattern pattern = Pattern.compile("(\\{331:.{51})([0-9]{6})");
+        Matcher matcher = pattern.matcher(event);
+        if (matcher.find()) {
+            return matcher.group(2);
+        } else {
+            return null;
+        }
+    }
+
+    private String extractLastMessageReceivedSequence(final String event) {
+        Pattern pattern = Pattern.compile("(\\{331:.{57})([0-9]{6})");
+        Matcher matcher = pattern.matcher(event);
+        if (matcher.find()) {
+            return matcher.group(2);
+        } else {
+            return null;
+        }
     }
 
 }
