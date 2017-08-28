@@ -1,7 +1,6 @@
 package ar.com.financial.event.recorder.reader.file;
 
 import ar.com.financial.event.recorder.domain.RawEvent;
-import ar.com.financial.event.recorder.parser.EventParser;
 import ar.com.financial.event.recorder.reader.Reader;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -9,12 +8,12 @@ import org.apache.commons.lang3.Validate;
 public class FileEventReader implements Reader<RawEvent> {
 
     private FileDataReader file;
-    private EventParser parser;
+    private FileEventParser parser;
 
     public FileEventReader(final String fileName) {
         Validate.notBlank(fileName, "The file name cannot be blank");
         this.file = new FileDataReader(fileName);
-        this.parser = new EventParser();
+        this.parser = new FileEventParser();
     }
 
     @Override

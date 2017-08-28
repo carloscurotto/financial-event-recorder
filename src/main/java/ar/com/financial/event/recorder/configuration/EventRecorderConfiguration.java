@@ -4,6 +4,7 @@ import ar.com.financial.event.recorder.EventRecorder;
 import ar.com.financial.event.recorder.domain.RawEvent;
 import ar.com.financial.event.recorder.reader.Reader;
 import ar.com.financial.event.recorder.reader.file.FileEventReader;
+import ar.com.financial.event.recorder.reader.snmp.SNMPEventReader;
 import ar.com.financial.event.recorder.writer.MultipleEventWriter;
 import ar.com.financial.event.recorder.writer.Writer;
 import ar.com.financial.event.recorder.writer.console.ConsoleSimpleEventWriter;
@@ -13,11 +14,18 @@ import ar.com.financial.event.recorder.writer.database.DatabaseSummaryEventWrite
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class EventRecorderConfiguration {
+
+    @Value("${snmp.host}")
+    private String snmpHost;
+
+    @Value("${snmp.port}")
+    private String snmpPort;
 
     @Bean
     @Qualifier("reader")
@@ -38,7 +46,7 @@ public class EventRecorderConfiguration {
         if (type.equalsIgnoreCase("file")) {
             return new FileEventReader("config/event-log.txt");
         } else if (type.equalsIgnoreCase("snmp")) {
-            throw new NotImplementedException("The snmp reader is not available yet");
+            return new SNMPEventReader(snmpHost, snmpPort);
         }
         throw new RuntimeException(String.format("The event reader of type [%s] is not supported", type));
     }
