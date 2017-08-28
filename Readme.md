@@ -19,8 +19,6 @@ java [configuration parameters] -jar target/financial-event-recorder.jar
 ### Reader
 -Dreader-type=[file, snmp] (only one value is allowed at a time).
 
-**Note: the snmp option is not allowed yet!!.**
-
 ### Writer
 -Dwriter-type=[console, database] (only one value is allowed at a time)
 
