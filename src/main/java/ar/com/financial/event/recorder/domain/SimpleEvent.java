@@ -10,7 +10,6 @@ import java.util.Date;
 @Entity
 public class SimpleEvent {
 
-    @Id
     @GeneratedValue
     private int id;
 
@@ -22,6 +21,7 @@ public class SimpleEvent {
     private String type;
     private String suffix;
     private String session;
+    @Id
     private String sequence;
     private String localBic;
 

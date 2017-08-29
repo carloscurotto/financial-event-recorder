@@ -10,10 +10,10 @@ import java.util.Date;
 @Entity
 public class SummaryEvent {
 
-    @Id
     @GeneratedValue
     private int id;
 
+    @Id
     private String session;
     private Date startSessionTime;
     private Date endSessionTime;
