@@ -2,23 +2,14 @@ package ar.com.financial.event.recorder.writer;
 
 import ar.com.financial.event.recorder.domain.RawEvent;
 import org.apache.commons.lang3.Validate;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
-@Service
 public class MultipleEventWriter implements Writer<RawEvent> {
 
     private Collection<Writer<RawEvent>> writers = new ArrayList<>();
-
-    /**
-     * Do not use, framework usage only.
-     */
-    @Deprecated
-    public MultipleEventWriter() {
-    }
 
     @SafeVarargs
     public MultipleEventWriter(final Writer<RawEvent>... writers) {
@@ -42,9 +33,7 @@ public class MultipleEventWriter implements Writer<RawEvent> {
 
     @Override
     public void write(final RawEvent event) {
-        writers.forEach(writer -> {
-            writer.write(event);
-        });
+        writers.forEach(writer -> writer.write(event));
     }
 
 }
