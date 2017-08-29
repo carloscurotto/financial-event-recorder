@@ -100,7 +100,7 @@ public class SNMPDataReader implements Reader<CommandResponderEvent>, CommandRes
         try {
             return queue.take();
         } catch (Exception e) {
-            logger.warn("Error reading event.", e);
+            logger.warn(String.format("Error reading event [%s]", e.getMessage()));
             return null;
         }
     }
@@ -112,7 +112,7 @@ public class SNMPDataReader implements Reader<CommandResponderEvent>, CommandRes
         try {
             queue.put(event);
         } catch (Exception e) {
-            logger.warn("Error processing event.", e);
+            logger.warn(String.format("Error processing event [%s]", e.getMessage()));
         }
     }
 

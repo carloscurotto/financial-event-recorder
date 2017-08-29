@@ -5,9 +5,15 @@ import ar.com.financial.event.recorder.reader.Reader;
 import ar.com.financial.event.recorder.writer.Writer;
 import org.apache.commons.lang3.Validate;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+
 public class EventRecorder {
 
+    public static final String EVENT_RECORDER_EXECUTOR = "event-recorder-executor";
     private volatile boolean started = false;
+    private ExecutorService executor;
     private Reader<RawEvent> eventReader;
     private Writer<RawEvent> eventWriter;
 
@@ -21,8 +27,14 @@ public class EventRecorder {
     public void start() {
         startWriter();
         startReader();
+        startExecutor();
         markStarted();
-        run();
+    }
+
+    private void startExecutor() {
+        executor = Executors.newSingleThreadExecutor(runnable ->
+                new Thread(runnable, EVENT_RECORDER_EXECUTOR));
+        executor.submit(this::run);
     }
 
     private void startWriter() {
@@ -38,9 +50,14 @@ public class EventRecorder {
     }
 
     public void stop() {
+        stopExecutor();
         stopReader();
         stopWriter();
         markStopped();
+    }
+
+    private void stopExecutor() {
+        executor.shutdownNow();
     }
 
     private void stopReader() {
