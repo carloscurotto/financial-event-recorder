@@ -25,6 +25,9 @@ public class FileEventParser {
     public RawEvent parse(final String data) {
         Validate.notBlank(data, "The event cannot be blank");
         final String event = prepare(data);
+        if (event == null) {
+            return null;
+        }
         final Date arrivalTime = extractArrivalTime(event);
         final Date originTime = extractOriginTime(event);
         final String code = extractCode(event);
@@ -49,7 +52,12 @@ public class FileEventParser {
     }
 
     private String prepare(String data) {
-        return data.trim();
+        final String rawData = data != null ? data.trim() : null;
+        if (rawData == null) {
+            return null;
+        } else {
+            return rawData;
+        }
     }
 
     private Date extractArrivalTime(final String event) {
