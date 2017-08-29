@@ -5,10 +5,15 @@ import ar.com.financial.event.recorder.domain.SummaryEvent;
 import ar.com.financial.event.recorder.writer.database.SimpleEventRepository;
 import ar.com.financial.event.recorder.writer.database.SummaryEventRepository;
 import com.vaadin.annotations.Theme;
+import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.*;
+import com.vaadin.ui.components.grid.HeaderCell;
+import com.vaadin.ui.components.grid.HeaderRow;
+import com.vaadin.ui.themes.ValoTheme;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.gridutil.cell.GridCellFilter;
 
 @SpringUI
 @Theme("valo")
@@ -31,6 +36,9 @@ public class Dashboard extends UI {
         simpleEventGrid.setSizeFull();
         summaryEventGrid.setSizeFull();
         summaryEventGrid.setVisible(false);
+
+        addSimpleEventGridFilters(simpleEventGrid);
+        addSummaryEventGridFilters(summaryEventGrid);
 
         VerticalLayout content = new VerticalLayout();
         setContent(content);
@@ -70,6 +78,33 @@ public class Dashboard extends UI {
     private void initializeGrids() {
         simpleEventGrid.setItems(simpleEventRepository.findAll());
         summaryEventGrid.setItems(summaryEventRepository.findAll());
+    }
+
+    private void addSummaryEventGridFilters(Grid<SummaryEvent> grid) {
+        final GridCellFilter filter = new GridCellFilter(grid, SummaryEvent.class);
+        filter.setTextFilter("session", true, true);
+        filter.setDateFilter("startSessionTime");
+        filter.setDateFilter("endSessionTime");
+        filter.setTextFilter("quantityMessagesSent", true, true);
+        filter.setTextFilter("quantityMessagesReceived", true, true);
+        filter.setTextFilter("firstMessageSentSequence", true, true);
+        filter.setTextFilter("lastMessageSentSequence", true, true);
+        filter.setTextFilter("firstMessageReceivedSequence", true, true);
+        filter.setTextFilter("lastMessageReceivedSequence", true, true);
+    }
+
+    private void addSimpleEventGridFilters(Grid<SimpleEvent> grid) {
+        final GridCellFilter filter = new GridCellFilter(grid, SimpleEvent.class);
+        filter.setDateFilter("arrivalTime");
+        filter.setDateFilter("originTime");
+        filter.setTextFilter("code", true, true);
+        filter.setTextFilter("inputOutput", true, true);
+        filter.setTextFilter("remoteBic", true, true);
+        filter.setTextFilter("type", true, true);
+        filter.setTextFilter("suffix", true, true);
+        filter.setTextFilter("session", true, true);
+        filter.setTextFilter("sequence", true, true);
+        filter.setTextFilter("localBic", true, true);
     }
 
 }
