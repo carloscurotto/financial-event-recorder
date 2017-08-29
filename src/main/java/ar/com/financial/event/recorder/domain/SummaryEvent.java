@@ -14,6 +14,7 @@ public class SummaryEvent {
     @GeneratedValue
     private int id;
 
+    private String session;
     private Date startSessionTime;
     private Date endSessionTime;
     private String quantityMessagesSent;
@@ -29,7 +30,8 @@ public class SummaryEvent {
     @Deprecated
     public SummaryEvent() {}
 
-    public SummaryEvent(final Date startSessionTime,
+    public SummaryEvent(final String session,
+                        final Date startSessionTime,
                         final Date endSessionTime,
                         final String quantityMessagesSent,
                         final String quantityMessagesReceived,
@@ -37,6 +39,7 @@ public class SummaryEvent {
                         final String lastMessageSentSequence,
                         final String firstMessageReceivedSequence,
                         final String lastMessageReceivedSequence) {
+        this.session = session;
         this.startSessionTime = startSessionTime;
         this.endSessionTime = endSessionTime;
         this.quantityMessagesSent = quantityMessagesSent;
@@ -53,6 +56,14 @@ public class SummaryEvent {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getSession() {
+        return session;
+    }
+
+    public void setSession(String session) {
+        this.session = session;
     }
 
     public Date getStartSessionTime() {
@@ -123,6 +134,7 @@ public class SummaryEvent {
     public String toString() {
         return "SummaryEvent{" +
                 "id=" + id +
+                ", session='" + session + '\'' +
                 ", startSessionTime=" + startSessionTime +
                 ", endSessionTime=" + endSessionTime +
                 ", quantityMessagesSent='" + quantityMessagesSent + '\'' +

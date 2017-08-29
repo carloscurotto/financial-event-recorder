@@ -222,7 +222,7 @@ public class RawEvent {
     }
 
     public SummaryEvent toSummary() {
-        return new SummaryEvent(startSessionTime, endSessionTime, quantityMessagesSent, quantityMessagesReceived,
+        return new SummaryEvent(session, startSessionTime, endSessionTime, quantityMessagesSent, quantityMessagesReceived,
                 firstMessageSentSequence, lastMessageSentSequence, firstMessageReceivedSequence, lastMessageReceivedSequence);
     }
 
