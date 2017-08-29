@@ -11,9 +11,10 @@ import ar.com.financial.event.recorder.writer.console.ConsoleSimpleEventWriter;
 import ar.com.financial.event.recorder.writer.console.ConsoleSummaryEventWriter;
 import ar.com.financial.event.recorder.writer.database.DatabaseSimpleEventWriter;
 import ar.com.financial.event.recorder.writer.database.DatabaseSummaryEventWriter;
-import org.apache.commons.lang3.NotImplementedException;
+import ar.com.financial.event.recorder.writer.database.SimpleEventRepository;
+import ar.com.financial.event.recorder.writer.database.SummaryEventRepository;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,19 +28,24 @@ public class EventRecorderConfiguration {
     @Value("${snmp.port}")
     private String snmpPort;
 
+    @Autowired
+    private SimpleEventRepository simpleEventRepository;
+
+    @Autowired
+    private SummaryEventRepository summaryEventRepository;
+
     @Bean
-    @Qualifier("reader")
     public Reader<RawEvent> createEventReader() {
         return getEventReader(getEventReaderType());
     }
 
-    private String getEventReaderType () {
-        String type = System.getProperty("reader-type");
-        if (StringUtils.isNotBlank(type)) {
-            return type.trim();
-        } else {
-            return "file";
-        }
+    private String getEventReaderType() {
+        return getOrDefaultProperty("reader-type", "file");
+    }
+
+    private String getOrDefaultProperty(final String name, final String defaultValue) {
+        String value = System.getProperty(name);
+        return (StringUtils.isNotBlank(value)) ? value.trim() : defaultValue;
     }
 
     private Reader<RawEvent> getEventReader(final String type) {
@@ -52,28 +58,12 @@ public class EventRecorderConfiguration {
     }
 
     @Bean
-    @Qualifier("writer")
     public Writer<RawEvent> createEventWriter() {
         return getEventWriter(getEventWriterType());
     }
 
-    private String getEventWriterType () {
-        String type = System.getProperty("writer-type");
-        if (StringUtils.isNotBlank(type)) {
-            return type.trim();
-        } else {
-            return "console";
-        }
-    }
-
-    @Bean
-    public Writer<RawEvent> createDatabaseEventWriter() {
-        return new DatabaseSimpleEventWriter();
-    }
-
-    @Bean
-    public Writer<RawEvent> createDatabaseSummaryWriter() {
-        return new DatabaseSummaryEventWriter();
+    private String getEventWriterType() {
+        return getOrDefaultProperty("writer-type", "console");
     }
 
     private Writer<RawEvent> getEventWriter(final String type) {
@@ -85,9 +75,17 @@ public class EventRecorderConfiguration {
         throw new RuntimeException(String.format("The event writer of type [%s] is not supported", type));
     }
 
+    private Writer<RawEvent> createDatabaseEventWriter() {
+        return new DatabaseSimpleEventWriter(simpleEventRepository);
+    }
+
+    private Writer<RawEvent> createDatabaseSummaryWriter() {
+        return new DatabaseSummaryEventWriter(summaryEventRepository);
+    }
+
     @Bean(initMethod = "start", destroyMethod = "stop")
-    public EventRecorder createEventRecorder(@Qualifier("reader") final Reader<RawEvent> eventReader,
-                                             @Qualifier("writer") final Writer<RawEvent> eventWriter) {
+    public EventRecorder createEventRecorder(final Reader<RawEvent> eventReader,
+                                             final Writer<RawEvent> eventWriter) {
         return new EventRecorder(eventReader, eventWriter);
     }
 

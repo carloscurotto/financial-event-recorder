@@ -3,14 +3,16 @@ package ar.com.financial.event.recorder.writer.database;
 import ar.com.financial.event.recorder.domain.RawEvent;
 import ar.com.financial.event.recorder.domain.SimpleEvent;
 import ar.com.financial.event.recorder.writer.Writer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.apache.commons.lang3.Validate;
 
-@Service
 public class DatabaseSimpleEventWriter implements Writer<RawEvent> {
 
-    @Autowired
     private SimpleEventRepository eventRepository;
+
+    public DatabaseSimpleEventWriter(final SimpleEventRepository eventRepository) {
+        Validate.notNull(eventRepository, "The SimpleEventRepository cannot be null");
+        this.eventRepository = eventRepository;
+    }
 
     @Override
     public void open() {
