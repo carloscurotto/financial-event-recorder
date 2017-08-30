@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-public class EventRecorder {
+public class AsyncEventRecorder {
 
     public static final String EVENT_RECORDER_EXECUTOR = "event-recorder-executor";
     private volatile boolean started = false;
@@ -17,7 +17,7 @@ public class EventRecorder {
     private Reader<RawEvent> eventReader;
     private Writer<RawEvent> eventWriter;
 
-    public EventRecorder(final Reader eventReader, final Writer eventWriter) {
+    public AsyncEventRecorder(final Reader eventReader, final Writer eventWriter) {
         Validate.notNull(eventReader, "The event reader cannot be null");
         Validate.notNull(eventWriter, "The event writer cannot be null");
         this.eventReader = eventReader;
@@ -27,8 +27,8 @@ public class EventRecorder {
     public void start() {
         startWriter();
         startReader();
-        startExecutor();
         markStarted();
+        startExecutor();
     }
 
     private void startExecutor() {

@@ -8,14 +8,27 @@ import org.snmp4j.smi.OID;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SNMPEventParser {
 
-    public RawEvent parse(final CommandResponderEvent event) {
-        Validate.notNull(event, "The event cannot be null");
+    private final Collection<String> eventCodes;
+
+    public SNMPEventParser(final Collection<String> eventCodes) {
+        Validate.notEmpty(eventCodes, "The event codes cannot be empty");
+        this.eventCodes = new ArrayList<>(eventCodes);
+    }
+
+    public RawEvent parse(final CommandResponderEvent data) {
+        Validate.notNull(data, "The event cannot be null");
+        final CommandResponderEvent event = prepare(data);
+        if (event == null) {
+            return null;
+        }
         final Date arrivalTime = extractArrivalTime(event);
         final Date originTime = extractOriginTime(event);
         final String code = extractCode(event);
@@ -37,6 +50,14 @@ public class SNMPEventParser {
         return new RawEvent(arrivalTime, originTime, code, inputOutput, remoteBic, type, suffix, session, sequence,
                 localBic, startSessionTime, endSessionTime, quantityMessagesSent, quantityMessagesReceived,
                 firstMessageSentSequence, lastMessageSentSequence, firstMessageReceivedSequence, lastMessageReceivedSequence);
+    }
+
+    private CommandResponderEvent prepare(final CommandResponderEvent data) {
+        final String code = extractCode(data);
+        if (code == null || !eventCodes.contains(code)) {
+            return null;
+        }
+        return data;
     }
 
     private Date extractArrivalTime(final CommandResponderEvent event) {

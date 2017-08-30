@@ -1,5 +1,6 @@
 package ar.com.financial.event.recorder.ui;
 
+import ar.com.financial.event.recorder.EventSynchronizer;
 import ar.com.financial.event.recorder.domain.SimpleEvent;
 import ar.com.financial.event.recorder.domain.SummaryEvent;
 import ar.com.financial.event.recorder.writer.database.SimpleEventRepository;
@@ -12,6 +13,7 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.components.grid.HeaderCell;
 import com.vaadin.ui.components.grid.HeaderRow;
 import com.vaadin.ui.themes.ValoTheme;
+import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.gridutil.cell.GridCellFilter;
 
@@ -24,6 +26,9 @@ public class Dashboard extends UI {
 
     @Autowired
     private SummaryEventRepository summaryEventRepository;
+
+    @Autowired
+    private EventSynchronizer eventSynchronizer;
 
     private Grid<SummaryEvent> summaryEventGrid = new Grid<>(SummaryEvent.class);
 
@@ -55,6 +60,7 @@ public class Dashboard extends UI {
         final Button simpleButton = new Button("Simple");
         simpleButton.setEnabled(false);
         final Button summaryButton = new Button("Summary");
+        final Button synchronizeButton = new Button("Synchronize");
 
         simpleButton.addClickListener(e -> {
             e.getButton().setEnabled(false);
@@ -70,8 +76,15 @@ public class Dashboard extends UI {
             summaryEventGrid.setVisible(true);
         });
 
+        synchronizeButton.addClickListener(e -> {
+            Notification.show("Starting event synchronization...");
+            eventSynchronizer.synchronize();
+            Notification.show("Event synchronization completed.");
+        });
+
         horizontalLayout.addComponent(simpleButton);
         horizontalLayout.addComponent(summaryButton);
+        horizontalLayout.addComponent(synchronizeButton);
         return horizontalLayout;
     }
 

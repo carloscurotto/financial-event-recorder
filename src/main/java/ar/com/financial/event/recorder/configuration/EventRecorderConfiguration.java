@@ -1,6 +1,7 @@
 package ar.com.financial.event.recorder.configuration;
 
-import ar.com.financial.event.recorder.EventRecorder;
+import ar.com.financial.event.recorder.AsyncEventRecorder;
+import ar.com.financial.event.recorder.EventSynchronizer;
 import ar.com.financial.event.recorder.domain.RawEvent;
 import ar.com.financial.event.recorder.reader.Reader;
 import ar.com.financial.event.recorder.reader.file.FileEventReader;
@@ -19,6 +20,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.List;
+
 @Configuration
 public class EventRecorderConfiguration {
 
@@ -28,11 +31,19 @@ public class EventRecorderConfiguration {
     @Value("${snmp.port}")
     private String snmpPort;
 
+    @Value("#{'${event.codes}'.split(',')}")
+    private List<String> eventCodes;
+
     @Autowired
     private SimpleEventRepository simpleEventRepository;
 
     @Autowired
     private SummaryEventRepository summaryEventRepository;
+
+    @Bean
+    public EventSynchronizer createEventSynchronizer() {
+        return new EventSynchronizer();
+    }
 
     @Bean
     public Reader<RawEvent> createEventReader() {
@@ -50,9 +61,9 @@ public class EventRecorderConfiguration {
 
     private Reader<RawEvent> getEventReader(final String type) {
         if (type.equalsIgnoreCase("file")) {
-            return new FileEventReader("config/event-log.txt");
+            return new FileEventReader("config/event-log.txt", eventCodes);
         } else if (type.equalsIgnoreCase("snmp")) {
-            return new SNMPEventReader(snmpHost, snmpPort);
+            return new SNMPEventReader(snmpHost, snmpPort, eventCodes);
         }
         throw new RuntimeException(String.format("The event reader of type [%s] is not supported", type));
     }
@@ -84,9 +95,9 @@ public class EventRecorderConfiguration {
     }
 
     @Bean(initMethod = "start", destroyMethod = "stop")
-    public EventRecorder createEventRecorder(final Reader<RawEvent> eventReader,
-                                             final Writer<RawEvent> eventWriter) {
-        return new EventRecorder(eventReader, eventWriter);
+    public AsyncEventRecorder createAsyncEventRecorder(final Reader<RawEvent> eventReader,
+                                                       final Writer<RawEvent> eventWriter) {
+        return new AsyncEventRecorder(eventReader, eventWriter);
     }
 
 }

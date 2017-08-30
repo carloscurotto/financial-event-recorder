@@ -5,15 +5,19 @@ import ar.com.financial.event.recorder.reader.Reader;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 public class FileEventReader implements Reader<RawEvent> {
 
     private FileDataReader file;
     private FileEventParser parser;
 
-    public FileEventReader(final String fileName) {
+    public FileEventReader(final String fileName, final Collection<String> eventCodes) {
         Validate.notBlank(fileName, "The file name cannot be blank");
+        Validate.notEmpty(eventCodes, "The event codes cannot be empty");
         this.file = new FileDataReader(fileName);
-        this.parser = new FileEventParser();
+        this.parser = new FileEventParser(new ArrayList<>(eventCodes));
     }
 
     @Override

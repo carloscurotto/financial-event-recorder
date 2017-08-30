@@ -5,16 +5,20 @@ import ar.com.financial.event.recorder.reader.Reader;
 import org.apache.commons.lang3.Validate;
 import org.snmp4j.CommandResponderEvent;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 public class SNMPEventReader implements Reader<RawEvent> {
 
     private SNMPDataReader snmp;
     private SNMPEventParser parser;
 
-    public SNMPEventReader(final String host, final String port) {
+    public SNMPEventReader(final String host, final String port, final Collection<String> eventCodes) {
         Validate.notBlank(host, "The host cannot be blank");
         Validate.notBlank(port, "The port cannot be blank");
+        Validate.notEmpty(eventCodes, "The event codes cannot be empty");
         this.snmp = new SNMPDataReader(host, port);
-        this.parser = new SNMPEventParser();
+        this.parser = new SNMPEventParser(new ArrayList<>(eventCodes));
     }
 
     @Override
