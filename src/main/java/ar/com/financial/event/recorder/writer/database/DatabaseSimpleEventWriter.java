@@ -27,7 +27,10 @@ public class DatabaseSimpleEventWriter implements Writer<RawEvent> {
         SimpleEvent toStore = event.toSimple();
         SimpleEvent fromStore = eventRepository.findOne(toStore.getSequence());
         if (fromStore == null) {
+            System.out.println("Storing simple event [" + toStore + "]. Not existent in database.");
             eventRepository.save(toStore);
+        } else {
+            System.out.println("Ignoring simple event [" + toStore + "]. Already exist in database.");
         }
     }
 

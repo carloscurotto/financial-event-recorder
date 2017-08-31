@@ -28,7 +28,10 @@ public class DatabaseSummaryEventWriter implements Writer<RawEvent> {
             SummaryEvent toStore = event.toSummary();
             SummaryEvent fromStore = summaryRepository.findOne(toStore.getSession());
             if (fromStore == null) {
+                System.out.println("Storing summary event [" + toStore + "]. Not existent in database.");
                 summaryRepository.save(toStore);
+            } else {
+                System.out.println("Ignoring summary event [" + toStore + "]. Already exist in database.");
             }
         }
     }
