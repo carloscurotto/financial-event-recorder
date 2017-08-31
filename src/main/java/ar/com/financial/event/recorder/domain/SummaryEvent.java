@@ -1,6 +1,5 @@
 package ar.com.financial.event.recorder.domain;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;

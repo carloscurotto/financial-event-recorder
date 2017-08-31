@@ -6,14 +6,9 @@ import ar.com.financial.event.recorder.domain.SummaryEvent;
 import ar.com.financial.event.recorder.writer.database.SimpleEventRepository;
 import ar.com.financial.event.recorder.writer.database.SummaryEventRepository;
 import com.vaadin.annotations.Theme;
-import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.*;
-import com.vaadin.ui.components.grid.HeaderCell;
-import com.vaadin.ui.components.grid.HeaderRow;
-import com.vaadin.ui.themes.ValoTheme;
-import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.gridutil.cell.GridCellFilter;
 
