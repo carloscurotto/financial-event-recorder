@@ -54,9 +54,12 @@ public class SNMPEventParser {
 
     private CommandResponderEvent prepare(final CommandResponderEvent data) {
         final String code = extractCode(data);
+        System.out.println("Message reeived with code [" +  code + "]");
         if (code == null || !eventCodes.contains(code)) {
+            System.out.println("Message reeived with code [" +  code + "]. Not recognized.");
             return null;
         }
+        System.out.println("Message reeived with code [" +  code + "]. Ready to be processed.");
         return data;
     }
 
