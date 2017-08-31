@@ -25,7 +25,7 @@ public class DatabaseSimpleEventWriter implements Writer<RawEvent> {
     @Override
     public synchronized void write(final RawEvent event) {
         SimpleEvent toStore = event.toSimple();
-        SimpleEvent fromStore = eventRepository.findOne(toStore.getSequence());
+        SimpleEvent fromStore = eventRepository.findOne(toStore.getKey());
         if (fromStore == null) {
             System.out.println("Storing simple event [" + toStore + "]. Not existent in database.");
             eventRepository.save(toStore);

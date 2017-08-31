@@ -6,17 +6,22 @@ import lombok.ToString;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
+import java.io.Serializable;
 import java.util.Date;
 
 @Entity
 @Data
 @NoArgsConstructor
 @ToString
-public class SummaryEvent {
+@IdClass(SummaryEventKey.class)
+public class SummaryEvent implements Serializable {
 
     @Id
     private String session;
+    @Id
     private Date startSessionTime;
+    @Id
     private Date endSessionTime;
     private String quantityMessagesSent;
     private String quantityMessagesReceived;
@@ -43,6 +48,10 @@ public class SummaryEvent {
         this.lastMessageSentSequence = lastMessageSentSequence;
         this.firstMessageReceivedSequence = firstMessageReceivedSequence;
         this.lastMessageReceivedSequence = lastMessageReceivedSequence;
+    }
+
+    public SummaryEventKey getKey() {
+        return new SummaryEventKey(session, startSessionTime, endSessionTime);
     }
 
 }

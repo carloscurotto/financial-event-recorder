@@ -7,15 +7,20 @@ import org.apache.commons.lang3.Validate;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
+import java.io.Serializable;
 import java.util.Date;
 
 @Entity
 @Data
 @ToString
 @NoArgsConstructor
-public class SimpleEvent {
+@IdClass(SimpleEventKey.class)
+public class SimpleEvent implements Serializable {
 
+    @Id
     private Date arrivalTime;
+    @Id
     private Date originTime;
     private String code;
     private String inputOutput;
@@ -27,8 +32,8 @@ public class SimpleEvent {
     private String sequence;
     private String localBic;
 
-    SimpleEvent(final Date arrivalTime,
-                final Date originTime,
+    SimpleEvent(final Date originTime,
+                final Date arrivalTime,
                 final String code,
                 final String inputOutput,
                 final String remoteBic,
@@ -37,13 +42,13 @@ public class SimpleEvent {
                 final String session,
                 final String sequence,
                 final String localBic) {
-        Validate.notNull(arrivalTime, "The arrival time cannot be null");
         Validate.notNull(originTime, "The origin time cannot be null");
+        Validate.notNull(arrivalTime, "The arrival time cannot be null");
         Validate.notNull(inputOutput, "The intput output cannot be null");
         Validate.notBlank(remoteBic, "The remote bic cannot be blank");
         Validate.notBlank(localBic, "The local bic cannot be blank");
-        this.arrivalTime = arrivalTime;
         this.originTime = originTime;
+        this.arrivalTime = arrivalTime;
         this.code = code;
         this.inputOutput = inputOutput;
         this.remoteBic = remoteBic;
@@ -52,6 +57,10 @@ public class SimpleEvent {
         this.session = session;
         this.sequence = sequence;
         this.localBic = localBic;
+    }
+
+    public SimpleEventKey getKey() {
+        return new SimpleEventKey(sequence, originTime, arrivalTime);
     }
 
 }
