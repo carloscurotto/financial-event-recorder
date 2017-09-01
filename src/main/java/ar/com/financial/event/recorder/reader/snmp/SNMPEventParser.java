@@ -50,7 +50,7 @@ public class SNMPEventParser {
         final String lastMessageSentSequence = extractLastMessageSentSequence(event);
         final String firstMessageReceivedSequence = extractFirstMessageReceivedSequence(event);
         final String lastMessageReceivedSequence = extractLastMessageReceivedSequence(event);
-        return new RawEvent(arrivalTime, originTime, code, inputOutput, remoteBic, type, suffix, session, sequence,
+        return new RawEvent(originTime, arrivalTime, code, inputOutput, remoteBic, type, suffix, session, sequence,
                 localBic, startSessionTime, endSessionTime, quantityMessagesSent, quantityMessagesReceived,
                 firstMessageSentSequence, lastMessageSentSequence, firstMessageReceivedSequence, lastMessageReceivedSequence);
     }
