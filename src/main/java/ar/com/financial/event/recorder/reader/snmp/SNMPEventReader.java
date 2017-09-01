@@ -3,12 +3,15 @@ package ar.com.financial.event.recorder.reader.snmp;
 import ar.com.financial.event.recorder.domain.RawEvent;
 import ar.com.financial.event.recorder.reader.Reader;
 import org.apache.commons.lang3.Validate;
+import org.apache.log4j.Logger;
 import org.snmp4j.CommandResponderEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class SNMPEventReader implements Reader<RawEvent> {
+
+    private static final Logger logger = Logger.getLogger(SNMPEventReader.class);
 
     private SNMPDataReader snmp;
     private SNMPEventParser parser;
@@ -38,11 +41,15 @@ public class SNMPEventReader implements Reader<RawEvent> {
 
     @Override
     public RawEvent read() {
-        CommandResponderEvent data = snmp.read();
-        if (data == null) {
+        logger.debug("Waiting to receive message from snmp.");
+        CommandResponderEvent event = snmp.read();
+        logger.debug(String.format("Message received from snmp [%s].", event));
+        if (event == null) {
+            logger.debug("Null message received from snmp.");
             return null;
         }
-        return parser.parse(data);
+        logger.debug(String.format("Parsing message from snmp [%s].", event));
+        return parser.parse(event);
     }
 
 }

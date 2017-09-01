@@ -5,26 +5,21 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.apache.commons.lang3.Validate;
 
-import javax.persistence.Id;
 import java.io.Serializable;
-import java.util.Date;
 
 @EqualsAndHashCode
 @NoArgsConstructor
 @ToString
 public class SummaryEventKey implements Serializable {
 
+    private String localBic;
     private String session;
-    private Date startSessionTime;
-    private Date endSessionTime;
 
-    public SummaryEventKey(final String session, final Date startSessionTime, final Date endSessionTime) {
+    public SummaryEventKey(final String localBic, final String session) {
+        Validate.notBlank(localBic, "The local bic cannot be blank");
         Validate.notBlank(session, "The session cannot be blank");
-        Validate.notNull(startSessionTime, "The start session time cannot be null");
-        Validate.notNull(endSessionTime, "The end session time cannot be null");
+        this.localBic = localBic;
         this.session = session;
-        this.startSessionTime = startSessionTime;
-        this.endSessionTime = endSessionTime;
     }
 
 }

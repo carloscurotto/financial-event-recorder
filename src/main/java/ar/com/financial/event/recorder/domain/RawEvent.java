@@ -84,12 +84,12 @@ public class RawEvent {
     }
 
     public SummaryEvent toSummary() {
-        return new SummaryEvent(session, startSessionTime, endSessionTime, quantityMessagesSent, quantityMessagesReceived,
+        return new SummaryEvent(localBic, session, startSessionTime, endSessionTime, quantityMessagesSent, quantityMessagesReceived,
                 firstMessageSentSequence, lastMessageSentSequence, firstMessageReceivedSequence, lastMessageReceivedSequence);
     }
 
     public SimpleEvent toSimple() {
-        return new SimpleEvent(originTime, arrivalTime, code, inputOutput, remoteBic, type, suffix, session, sequence, localBic);
+        return new SimpleEvent(localBic, session, sequence, remoteBic, originTime, arrivalTime, code, inputOutput, type, suffix);
     }
 
 }

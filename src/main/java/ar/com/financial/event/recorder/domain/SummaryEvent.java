@@ -18,10 +18,10 @@ import java.util.Date;
 public class SummaryEvent implements Serializable {
 
     @Id
+    private String localBic;
+    @Id
     private String session;
-    @Id
     private Date startSessionTime;
-    @Id
     private Date endSessionTime;
     private String quantityMessagesSent;
     private String quantityMessagesReceived;
@@ -30,7 +30,8 @@ public class SummaryEvent implements Serializable {
     private String firstMessageReceivedSequence;
     private String lastMessageReceivedSequence;
 
-    SummaryEvent(final String session,
+    SummaryEvent(final String localBic,
+                 final String session,
                  final Date startSessionTime,
                  final Date endSessionTime,
                  final String quantityMessagesSent,
@@ -39,6 +40,7 @@ public class SummaryEvent implements Serializable {
                  final String lastMessageSentSequence,
                  final String firstMessageReceivedSequence,
                  final String lastMessageReceivedSequence) {
+        this.localBic = localBic;
         this.session = session;
         this.startSessionTime = startSessionTime;
         this.endSessionTime = endSessionTime;
@@ -51,7 +53,7 @@ public class SummaryEvent implements Serializable {
     }
 
     public SummaryEventKey getKey() {
-        return new SummaryEventKey(session, startSessionTime, endSessionTime);
+        return new SummaryEventKey(localBic, session);
     }
 
 }

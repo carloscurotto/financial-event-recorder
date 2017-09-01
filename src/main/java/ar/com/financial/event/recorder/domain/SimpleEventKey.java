@@ -6,24 +6,23 @@ import lombok.ToString;
 import org.apache.commons.lang3.Validate;
 
 import java.io.Serializable;
-import java.util.Date;
 
 @EqualsAndHashCode
 @NoArgsConstructor
 @ToString
 public class SimpleEventKey implements Serializable {
 
+    private String localBic;
+    private String session;
     private String sequence;
-    private Date originTime;
-    private Date arrivalTime;
 
-    public SimpleEventKey(final String sequence, final Date originTime, final Date arrivalTime) {
+    public SimpleEventKey(final String localBic, final String session, final String sequence) {
+        Validate.notBlank(localBic, "The local bic cannot be blank");
+        Validate.notBlank(session, "The session cannot be blank");
         Validate.notBlank(sequence, "The sequence cannot be blank");
-        Validate.notNull(originTime, "The origin time cannot be null");
-        Validate.notNull(arrivalTime, "The arrival time cannot be null");
+        this.localBic = localBic;
+        this.session = session;
         this.sequence = sequence;
-        this.originTime = originTime;
-        this.arrivalTime = arrivalTime;
     }
 
 }

@@ -4,8 +4,11 @@ import ar.com.financial.event.recorder.domain.RawEvent;
 import ar.com.financial.event.recorder.domain.SummaryEvent;
 import ar.com.financial.event.recorder.writer.Writer;
 import org.apache.commons.lang3.Validate;
+import org.apache.log4j.Logger;
 
 public class DatabaseSummaryEventWriter implements Writer<RawEvent> {
+
+    private static final Logger logger = Logger.getLogger(DatabaseSummaryEventWriter.class);
 
     private SummaryEventRepository summaryRepository;
 
@@ -16,22 +19,23 @@ public class DatabaseSummaryEventWriter implements Writer<RawEvent> {
 
     @Override
     public void open() {
+        logger.info("Opening database summary event writer.");
     }
 
     @Override
     public void close() {
+        logger.info("Closing database summary event writer.");
     }
 
     @Override
     public synchronized void write(final RawEvent event) {
         if (event.isSummary()) {
-            SummaryEvent toStore = event.toSummary();
-            SummaryEvent fromStore = summaryRepository.findOne(toStore.getKey());
-            if (fromStore == null) {
-                System.out.println("Storing summary event [" + toStore + "]. Not existent in database.");
+            try {
+                SummaryEvent toStore = event.toSummary();
+                logger.debug(String.format("Writing summary event in database [%s].", toStore));
                 summaryRepository.save(toStore);
-            } else {
-                System.out.println("Ignoring summary event [" + toStore + "]. Already exist in database.");
+            } catch (Exception e) {
+                logger.error(String.format("Error writing summary event in database [%s].", event));
             }
         }
     }

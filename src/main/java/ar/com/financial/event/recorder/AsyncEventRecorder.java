@@ -4,13 +4,17 @@ import ar.com.financial.event.recorder.domain.RawEvent;
 import ar.com.financial.event.recorder.reader.Reader;
 import ar.com.financial.event.recorder.writer.Writer;
 import org.apache.commons.lang3.Validate;
+import org.apache.log4j.Logger;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class AsyncEventRecorder {
 
-    public static final String EVENT_RECORDER_EXECUTOR = "event-recorder-executor";
+    private static final Logger logger = Logger.getLogger(AsyncEventRecorder.class);
+
+    private static final String EVENT_RECORDER_EXECUTOR = "event-recorder-executor";
+
     private volatile boolean started = false;
     private ExecutorService executor;
     private Reader<RawEvent> eventReader;
@@ -77,9 +81,14 @@ public class AsyncEventRecorder {
 
     private void run() {
         while (isStarted() && hasNext()) {
-            RawEvent event = readEvent();
-            if (event != null) {
-                writeEvent(event);
+            RawEvent event = null;
+            try {
+                event = readEvent();
+                if (event != null) {
+                    writeEvent(event);
+                }
+            } catch (Exception e) {
+                logger.error(String.format("Error processing event [%s].", event), e);
             }
         }
     }

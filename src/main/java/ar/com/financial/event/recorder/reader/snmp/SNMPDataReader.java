@@ -98,7 +98,9 @@ public class SNMPDataReader implements Reader<CommandResponderEvent>, CommandRes
     @Override
     public CommandResponderEvent read() {
         try {
-            return queue.take();
+            final CommandResponderEvent event = queue.take();
+            logger.debug(String.format("Reading event [%s] from snmp.", event));
+            return event;
         } catch (Exception e) {
             logger.warn(String.format("Error reading event [%s]", e.getMessage()));
             return null;
@@ -110,6 +112,7 @@ public class SNMPDataReader implements Reader<CommandResponderEvent>, CommandRes
      */
     public synchronized void processPdu(final CommandResponderEvent event) {
         try {
+            logger.debug(String.format("Processing event [%s] from snmp.", event));
             queue.put(event);
         } catch (Exception e) {
             logger.warn(String.format("Error processing event [%s]", e.getMessage()));

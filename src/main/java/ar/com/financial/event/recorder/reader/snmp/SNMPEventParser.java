@@ -2,6 +2,7 @@ package ar.com.financial.event.recorder.reader.snmp;
 
 import ar.com.financial.event.recorder.domain.RawEvent;
 import org.apache.commons.lang3.Validate;
+import org.apache.log4j.Logger;
 import org.snmp4j.CommandResponderEvent;
 import org.snmp4j.smi.OID;
 
@@ -15,6 +16,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SNMPEventParser {
+
+    private static final Logger logger = Logger.getLogger(SNMPEventParser.class);
 
     private final Collection<String> eventCodes;
 
@@ -53,12 +56,13 @@ public class SNMPEventParser {
     }
 
     private CommandResponderEvent prepare(final CommandResponderEvent data) {
+        logger.debug(String.format("Message received in parser [%s].", data));
         final String code = extractCode(data);
         if (code == null || !eventCodes.contains(code)) {
-            System.out.println("Message reeived with code [" +  code + "]. Not recognized.");
+            logger.debug("Message received in parser with code [" +  code + "]. Not recognized.");
             return null;
         }
-        System.out.println("Message reeived with code [" +  code + "]. Ready to be processed.");
+        logger.debug("Message received in parser with code [" +  code + "]. Ready to be processed.");
         return data;
     }
 

@@ -4,8 +4,11 @@ import ar.com.financial.event.recorder.domain.RawEvent;
 import ar.com.financial.event.recorder.domain.SimpleEvent;
 import ar.com.financial.event.recorder.writer.Writer;
 import org.apache.commons.lang3.Validate;
+import org.apache.log4j.Logger;
 
 public class DatabaseSimpleEventWriter implements Writer<RawEvent> {
+
+    private static final Logger logger = Logger.getLogger(DatabaseSimpleEventWriter.class);
 
     private SimpleEventRepository eventRepository;
 
@@ -16,21 +19,22 @@ public class DatabaseSimpleEventWriter implements Writer<RawEvent> {
 
     @Override
     public void open() {
+        logger.info("Opening database simple event writer.");
     }
 
     @Override
     public void close() {
+        logger.info("Closing database simple event writer.");
     }
 
     @Override
     public synchronized void write(final RawEvent event) {
-        SimpleEvent toStore = event.toSimple();
-        SimpleEvent fromStore = eventRepository.findOne(toStore.getKey());
-        if (fromStore == null) {
-            System.out.println("Storing simple event [" + toStore + "]. Not existent in database.");
+        try {
+            SimpleEvent toStore = event.toSimple();
+            logger.debug(String.format("Writing simple event in database [%s].", toStore));
             eventRepository.save(toStore);
-        } else {
-            System.out.println("Ignoring simple event [" + toStore + "]. Already exist in database.");
+        } catch (Exception e) {
+            logger.error(String.format("Error writing simple event in database [%s].", event));
         }
     }
 
