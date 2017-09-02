@@ -27,7 +27,7 @@ public class SNMPEventParser {
     }
 
     public RawEvent parse(final CommandResponderEvent data) {
-        Validate.notNull(data, "The event cannot be null");
+            Validate.notNull(data, "The event cannot be null");
         final CommandResponderEvent event = prepare(data);
         if (event == null) {
             return null;
@@ -110,7 +110,7 @@ public class SNMPEventParser {
 
     private String extractType(final CommandResponderEvent event) {
         final String messageData = event.getPDU().getVariable(new OID("1.3.6.1.4.1.18494.2.1.9")).toString();
-        Pattern pattern = Pattern.compile("(.+UMID )([A-Z]{1})([A-Z0-9]{11})([A-Z0-9]{3})");
+        Pattern pattern = Pattern.compile("(.+UMID )([A-Z]{1})([A-Z0-9]{11})([0-9]{1,3})");
         Matcher matcher = pattern.matcher(messageData);
         if (matcher.find()) {
             return matcher.group(4);
@@ -132,23 +132,43 @@ public class SNMPEventParser {
 
     private String extractSession(final CommandResponderEvent event) {
         final String messageData = event.getPDU().getVariable(new OID("1.3.6.1.4.1.18494.2.1.9")).toString();
-        Pattern pattern = Pattern.compile("(.+UMID )(.+Suffix )([A-Z0-9]+)(: Received. Session )([0-9]{4})");
-        Matcher matcher = pattern.matcher(messageData);
-        if (matcher.find()) {
-            return matcher.group(5);
+        if (!messageData.contains("Quit")) {
+            Pattern pattern = Pattern.compile("(.+UMID )(.+Suffix )([0-9]+)(:.+Session )([0-9]+)(, [A-Za-z]+ )([0-9]+)");
+            Matcher matcher = pattern.matcher(messageData);
+            if (matcher.find()) {
+                return matcher.group(5);
+            } else {
+                return null;
+            }
         } else {
-            return null;
+                Pattern pattern = Pattern.compile("(\\{1:.{15})([0-9]{4})");
+            Matcher matcher = pattern.matcher(messageData);
+            if (matcher.find()) {
+                return matcher.group(2);
+            } else {
+                return null;
+            }
         }
     }
 
     private String extractSequence(final CommandResponderEvent event) {
         final String messageData = event.getPDU().getVariable(new OID("1.3.6.1.4.1.18494.2.1.9")).toString();
-        Pattern pattern = Pattern.compile("(.+UMID )(.+Suffix )([A-Z0-9]+)(: Received. Session )([0-9]{4})(, OSN )([0-9]+)");
-        Matcher matcher = pattern.matcher(messageData);
-        if (matcher.find()) {
-            return matcher.group(7);
+        if (!messageData.contains("Quit")) {
+            Pattern pattern = Pattern.compile("(.+UMID )(.+Suffix )([0-9]+)(:.+Session )([0-9]+)(, [A-Za-z]+ )([0-9]+)");
+            Matcher matcher = pattern.matcher(messageData);
+            if (matcher.find()) {
+                return matcher.group(7);
+            } else {
+                return null;
+            }
         } else {
-            return null;
+            Pattern pattern = Pattern.compile("(\\{1:.{15})([0-9]{4})([0-9]{6})");
+            Matcher matcher = pattern.matcher(messageData);
+            if (matcher.find()) {
+                return matcher.group(3);
+            } else {
+                return null;
+            }
         }
     }
 
