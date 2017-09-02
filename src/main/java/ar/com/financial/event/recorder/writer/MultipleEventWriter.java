@@ -22,13 +22,13 @@ public class MultipleEventWriter implements Writer<RawEvent> {
     }
 
     @Override
-    public void open() {
-        writers.parallelStream().forEach(Writer::open);
+    public void start() {
+        writers.parallelStream().forEach(Writer::start);
     }
 
     @Override
-    public void close() {
-        writers.parallelStream().forEach(Writer::close);
+    public void stop() {
+        writers.parallelStream().forEach(Writer::stop);
     }
 
     @Override

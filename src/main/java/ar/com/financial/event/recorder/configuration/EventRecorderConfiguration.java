@@ -16,6 +16,7 @@ import ar.com.financial.event.recorder.writer.database.SimpleEventRepository;
 import ar.com.financial.event.recorder.writer.database.SummaryEventRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +25,10 @@ import java.util.List;
 
 @Configuration
 public class EventRecorderConfiguration {
+
+    private static final String CONSOLE_WRITER_TYPE = "console";
+    private static final String DATABASE_WRITER_TYPE = "database";
+    private static final String SYNCHRONIZER_EVENT_LOG = "config/event-log.txt";
 
     @Value("${snmp.host}")
     private String snmpHost;
@@ -34,70 +39,79 @@ public class EventRecorderConfiguration {
     @Value("#{'${event.codes}'.split(',')}")
     private List<String> eventCodes;
 
+    @Value("${writer:database}")
+    private String writerType;
+
     @Autowired
     private SimpleEventRepository simpleEventRepository;
 
     @Autowired
     private SummaryEventRepository summaryEventRepository;
 
+    @Bean(initMethod = "start", destroyMethod = "stop")
+    public EventSynchronizer createEventSynchronizer(@Qualifier("synchronizer-event-reader") final Reader<RawEvent> eventReader,
+                                                     @Qualifier("synchronizer-event-writer") final Writer<RawEvent> eventWriter) {
+        return new EventSynchronizer(eventReader, eventWriter);
+    }
+
+    @Qualifier("synchronizer-event-reader")
     @Bean
-    public EventSynchronizer createEventSynchronizer() {
-        return new EventSynchronizer();
+    public Reader<RawEvent> createSynchronizerEventReader() {
+        return new FileEventReader(SYNCHRONIZER_EVENT_LOG, eventCodes);
     }
 
+    @Qualifier("synchronizer-event-writer")
     @Bean
-    public Reader<RawEvent> createEventReader() {
-        return getEventReader(getEventReaderType());
+    public Writer<RawEvent> createSynchronizerEventWriter() {
+        return createEventWriter();
     }
 
-    private String getEventReaderType() {
-        return getOrDefaultProperty("reader-type", "file");
+    @Bean(initMethod = "start", destroyMethod = "stop")
+    public AsyncEventRecorder createAsyncEventRecorder(@Qualifier("recorder-event-reader") final Reader<RawEvent> eventReader,
+                                                       @Qualifier("recorder-event-writer") final Writer<RawEvent> eventWriter) {
+        return new AsyncEventRecorder(eventReader, eventWriter);
     }
 
-    private String getOrDefaultProperty(final String name, final String defaultValue) {
-        String value = System.getProperty(name);
-        return (StringUtils.isNotBlank(value)) ? value.trim() : defaultValue;
+    @Qualifier("recorder-event-reader")
+    @Bean(initMethod = "start", destroyMethod = "stop")
+    public Reader<RawEvent> createRecorderEventReader() {
+        return new SNMPEventReader(snmpHost, snmpPort, eventCodes);
     }
 
-    private Reader<RawEvent> getEventReader(final String type) {
-        if (type.equalsIgnoreCase("file")) {
-            return new FileEventReader("config/event-log.txt", eventCodes);
-        } else if (type.equalsIgnoreCase("snmp")) {
-            return new SNMPEventReader(snmpHost, snmpPort, eventCodes);
-        }
-        throw new RuntimeException(String.format("The event reader of type [%s] is not supported", type));
-    }
-
+    @Qualifier("recorder-event-writer")
     @Bean
+    public Writer<RawEvent> createRecorderEventWriter() {
+        return createEventWriter();
+    }
+
+    @Bean(initMethod = "start", destroyMethod = "stop")
     public Writer<RawEvent> createEventWriter() {
-        return getEventWriter(getEventWriterType());
-    }
-
-    private String getEventWriterType() {
-        return getOrDefaultProperty("writer-type", "console");
+        return getEventWriter(writerType);
     }
 
     private Writer<RawEvent> getEventWriter(final String type) {
-        if (type.equalsIgnoreCase("console")) {
-            return new MultipleEventWriter(new ConsoleSimpleEventWriter(), new ConsoleSummaryEventWriter());
-        } else if (type.equalsIgnoreCase("database")) {
-            return new MultipleEventWriter(createDatabaseEventWriter(), createDatabaseSummaryWriter());
+        if (type.equalsIgnoreCase(CONSOLE_WRITER_TYPE)) {
+            return new MultipleEventWriter(createConsoleSimpleEventWriter(), createConsoleSummaryEventWriter());
+        } else if (type.equalsIgnoreCase(DATABASE_WRITER_TYPE)) {
+            return new MultipleEventWriter(createDatabaseSimpleEventWriter(), createDatabaseSummaryEventWriter());
         }
         throw new RuntimeException(String.format("The event writer of type [%s] is not supported", type));
     }
 
-    private Writer<RawEvent> createDatabaseEventWriter() {
+    private Writer<RawEvent> createConsoleSimpleEventWriter() {
+        return new ConsoleSimpleEventWriter();
+    }
+
+    private Writer<RawEvent> createConsoleSummaryEventWriter() {
+        return new ConsoleSummaryEventWriter();
+    }
+
+    private Writer<RawEvent> createDatabaseSimpleEventWriter() {
         return new DatabaseSimpleEventWriter(simpleEventRepository);
     }
 
-    private Writer<RawEvent> createDatabaseSummaryWriter() {
+    private Writer<RawEvent> createDatabaseSummaryEventWriter() {
         return new DatabaseSummaryEventWriter(summaryEventRepository);
-    }
-
-    @Bean(initMethod = "start", destroyMethod = "stop")
-    public AsyncEventRecorder createAsyncEventRecorder(final Reader<RawEvent> eventReader,
-                                                       final Writer<RawEvent> eventWriter) {
-        return new AsyncEventRecorder(eventReader, eventWriter);
     }
 
 }

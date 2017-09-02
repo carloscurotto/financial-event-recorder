@@ -17,7 +17,7 @@ public class FileDataReader implements Reader<String> {
         this.fileName = fileName;
     }
 
-    public void open() {
+    public void start() {
         try {
             File file = new File(fileName);
             Scanner scanner = new Scanner(file);
@@ -28,7 +28,7 @@ public class FileDataReader implements Reader<String> {
         }
     }
 
-    public void close() {
+    public void stop() {
         if (scanner != null) {
             scanner.close();
         }

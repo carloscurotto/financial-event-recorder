@@ -2,9 +2,9 @@ package ar.com.financial.event.recorder.reader;
 
 public interface Reader<T> {
 
-    void open();
+    void start();
 
-    void close();
+    void stop();
 
     boolean hasNext();
 

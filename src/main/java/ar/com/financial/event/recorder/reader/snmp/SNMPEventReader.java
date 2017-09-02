@@ -25,13 +25,13 @@ public class SNMPEventReader implements Reader<RawEvent> {
     }
 
     @Override
-    public void open() {
-        snmp.open();
+    public void start() {
+        snmp.start();
     }
 
     @Override
-    public void close() {
-        snmp.close();
+    public void stop() {
+        snmp.stop();
     }
 
     @Override

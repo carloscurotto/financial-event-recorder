@@ -42,7 +42,7 @@ public class SNMPDataReader implements Reader<CommandResponderEvent>, CommandRes
     }
 
     @Override
-    public void open() {
+    public void start() {
         try {
             SNMP4JSettings.setAllowSNMPv2InV1(true);
 
@@ -78,7 +78,7 @@ public class SNMPDataReader implements Reader<CommandResponderEvent>, CommandRes
     }
 
     @Override
-    public void close() {
+    public void stop() {
         try {
             snmp.close();
             snmp.removeCommandResponder(this);

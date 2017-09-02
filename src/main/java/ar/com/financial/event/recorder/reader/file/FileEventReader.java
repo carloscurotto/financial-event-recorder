@@ -21,13 +21,13 @@ public class FileEventReader implements Reader<RawEvent> {
     }
 
     @Override
-    public void open() {
-        file.open();
+    public void start() {
+        file.start();
     }
 
     @Override
-    public void close() {
-        file.close();
+    public void stop() {
+        file.stop();
     }
 
     @Override

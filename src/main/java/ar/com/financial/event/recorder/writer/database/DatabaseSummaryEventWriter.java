@@ -18,13 +18,13 @@ public class DatabaseSummaryEventWriter implements Writer<RawEvent> {
     }
 
     @Override
-    public void open() {
-        logger.info("Opening database summary event writer.");
+    public void start() {
+        logger.info("Starting database summary event writer.");
     }
 
     @Override
-    public void close() {
-        logger.info("Closing database summary event writer.");
+    public void stop() {
+        logger.info("Stopping database summary event writer.");
     }
 
     @Override

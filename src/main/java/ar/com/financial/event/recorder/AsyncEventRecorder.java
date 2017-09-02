@@ -28,8 +28,6 @@ public class AsyncEventRecorder {
     }
 
     public void start() {
-        startWriter();
-        startReader();
         markStarted();
         startExecutor();
     }
@@ -40,35 +38,17 @@ public class AsyncEventRecorder {
         executor.submit(this::run);
     }
 
-    private void startWriter() {
-        eventWriter.open();
-    }
-
-    private void startReader() {
-        eventReader.open();
-    }
-
     private void markStarted() {
         this.started = true;
     }
 
     public void stop() {
         stopExecutor();
-        stopReader();
-        stopWriter();
         markStopped();
     }
 
     private void stopExecutor() {
         executor.shutdownNow();
-    }
-
-    private void stopReader() {
-        eventReader.close();
-    }
-
-    private void stopWriter() {
-        eventWriter.close();
     }
 
     private void markStopped() {

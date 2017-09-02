@@ -9,13 +9,13 @@ public class ConsoleSimpleEventWriter implements Writer<RawEvent> {
     private static final Logger logger = Logger.getLogger(ConsoleSimpleEventWriter.class);
 
     @Override
-    public void open() {
-        logger.info("Opening the console simple event writer.");
+    public void start() {
+        logger.info("Strting the console simple event writer.");
     }
 
     @Override
-    public void close() {
-        logger.info("Closing the console simple event writer.");
+    public void stop() {
+        logger.info("Stopping the console simple event writer.");
     }
 
     @Override

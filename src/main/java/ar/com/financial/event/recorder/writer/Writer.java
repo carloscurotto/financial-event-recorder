@@ -2,9 +2,9 @@ package ar.com.financial.event.recorder.writer;
 
 public interface Writer<T> {
 
-    void open();
+    void start();
 
-    void close();
+    void stop();
 
     void write(T data);
 
