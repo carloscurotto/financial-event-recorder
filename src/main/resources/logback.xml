@@ -12,7 +12,7 @@
         </encoder>
     </appender>
 
-    <logger name="ar.com.financial.event.recorder" level="DEBUG"/>
+    <logger name="ar.com.financial.event.recorder" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />

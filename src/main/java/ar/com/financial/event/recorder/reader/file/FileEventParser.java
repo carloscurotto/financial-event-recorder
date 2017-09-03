@@ -109,10 +109,11 @@ public class FileEventParser {
 
     private String extractType(final String event) {
         final String messageData = event.split("\\|")[33];
-        Pattern pattern = Pattern.compile("(.+UMID )(.{12})([0-9]{1,3})");
+        Pattern pattern = Pattern.compile("(.+UMID )([A-Z]{1})([A-Z0-9]{11})([0-9]{1,3})");
         Matcher matcher = pattern.matcher(messageData);
         if (matcher.find()) {
-            return matcher.group(3);
+            final String rawType = matcher.group(4);
+            return new Integer(rawType).toString();
         } else {
             return null;
         }
@@ -120,30 +121,33 @@ public class FileEventParser {
 
     private String extractSuffix(final String event) {
         final String messageData = event.split("\\|")[33];
-        final String suffixData = messageData.split(",")[1].trim();
-        final String suffix = suffixData.substring(7, suffixData.indexOf(':'));
-        if (StringUtils.isNotBlank(suffix)) {
-            return suffix.trim();
+        Pattern pattern = Pattern.compile("(.+UMID )(.+Suffix )([0-9]+)");
+        Matcher matcher = pattern.matcher(messageData);
+        if (matcher.find()) {
+            final String rawSuffix = matcher.group(3);
+            return new Long(rawSuffix).toString();
         } else {
-            return StringUtils.EMPTY;
+            return null;
         }
     }
 
     private String extractSession(final String event) {
         final String messageData = event.split("\\|")[33];
-        final String suffixData = messageData.split(",")[1].trim();
-        if (!suffixData.contains("Quit")) {
-            final String sessionData = suffixData.split("\\.")[1].trim();
-            if (StringUtils.isNotBlank(sessionData)) {
-                return sessionData.substring(8, sessionData.length()).trim();
+        if (!messageData.contains("Quit")) {
+            Pattern pattern = Pattern.compile("(.+UMID )(.+Suffix )([0-9]+)(:.+Session )([0-9]+)(, [A-Za-z]+ )([0-9]+)");
+            Matcher matcher = pattern.matcher(messageData);
+            if (matcher.find()) {
+                final String rawSession = matcher.group(5);
+                return new Integer(rawSession).toString();
             } else {
-                return StringUtils.EMPTY;
+                return null;
             }
         } else {
             Pattern pattern = Pattern.compile("(\\{1:.{15})([0-9]{4})");
             Matcher matcher = pattern.matcher(messageData);
             if (matcher.find()) {
-                return matcher.group(2);
+                final String rawSession = matcher.group(2);
+                return new Integer(rawSession).toString();
             } else {
                 return null;
             }
@@ -153,19 +157,20 @@ public class FileEventParser {
     private String extractSequence(final String event) {
         final String messageData = event.split("\\|")[33];
         if (!messageData.contains("Quit")) {
-            final String sequenceData = messageData.split(",")[2].trim();
-            if (StringUtils.isNotBlank(sequenceData)) {
-                int sequenceEnd = sequenceData.indexOf('.') != -1 ?
-                        sequenceData.indexOf('.') : sequenceData.indexOf(System.lineSeparator());
-                return sequenceData.substring(4, sequenceEnd).trim();
+            Pattern pattern = Pattern.compile("(.+UMID )(.+Suffix )([0-9]+)(:.+Session )([0-9]+)(, [A-Za-z]+ )([0-9]+)");
+            Matcher matcher = pattern.matcher(messageData);
+            if (matcher.find()) {
+                final String rawSequence = matcher.group(7);
+                return new Long(rawSequence).toString();
             } else {
-                return StringUtils.EMPTY;
+                return null;
             }
         } else {
             Pattern pattern = Pattern.compile("(\\{1:.{15})([0-9]{4})([0-9]{6})");
             Matcher matcher = pattern.matcher(messageData);
             if (matcher.find()) {
-                return matcher.group(3);
+                final String rawSequence = matcher.group(3);
+                return new Long(rawSequence).toString();
             } else {
                 return null;
             }
@@ -174,15 +179,20 @@ public class FileEventParser {
 
     private String extractLocalBic(final String event) {
         final String messageData = event.split("\\|")[33];
-        final int startIndex = messageData.indexOf('{') + 6;
-        final int endIndex = startIndex + 8;
-        return messageData.substring(startIndex, endIndex);
+        Pattern pattern = Pattern.compile("(\\{1:.{3})([A-Z0-9]{8})");
+        Matcher matcher = pattern.matcher(messageData);
+        if (matcher.find()) {
+            return matcher.group(2);
+        } else {
+            return null;
+        }
     }
 
     private Date extractStartSessionTime(final String event) {
+        final String messageData = event.split("\\|")[33];
         try {
             Pattern pattern = Pattern.compile("(\\{331:.{4})([0-9]{10})");
-            Matcher matcher = pattern.matcher(event);
+            Matcher matcher = pattern.matcher(messageData);
             if (matcher.find()) {
                 final String startSessionTimeData = matcher.group(2);
                 final DateFormat formatter = new SimpleDateFormat("yyMMddHHmm");
@@ -196,9 +206,10 @@ public class FileEventParser {
     }
 
     private Date extractEndSessionTime(final String event) {
+        final String messageData = event.split("\\|")[33];
         try {
             Pattern pattern = Pattern.compile("(\\{331:.{14})([0-9]{10})");
-            Matcher matcher = pattern.matcher(event);
+            Matcher matcher = pattern.matcher(messageData);
             if (matcher.find()) {
                 final String endSessionTimeData = matcher.group(2);
                 final DateFormat formatter = new SimpleDateFormat("yyMMddHHmm");
@@ -212,60 +223,72 @@ public class FileEventParser {
     }
 
     private String extractQuantityMessagesSent(final String event) {
+        final String messageData = event.split("\\|")[33];
         Pattern pattern = Pattern.compile("(\\{331:.{27})([0-9]{6})");
-        Matcher matcher = pattern.matcher(event);
+        Matcher matcher = pattern.matcher(messageData);
         if (matcher.find()) {
-            return matcher.group(2);
+            final String rawQuanityMessagesSent = matcher.group(2);
+            return new Integer(rawQuanityMessagesSent).toString();
         } else {
             return null;
         }
     }
 
     private String extractQuantityMessagesReceived(final String event) {
+        final String messageData = event.split("\\|")[33];
         Pattern pattern = Pattern.compile("(\\{331:.{33})([0-9]{6})");
-        Matcher matcher = pattern.matcher(event);
+        Matcher matcher = pattern.matcher(messageData);
         if (matcher.find()) {
-            return matcher.group(2);
+            final String rawQuantityMessagesReceived = matcher.group(2);
+            return new Integer(rawQuantityMessagesReceived).toString();
         } else {
             return null;
         }
     }
 
     private String extractFirstMessageSentSequence(final String event) {
+        final String messageData = event.split("\\|")[33];
         Pattern pattern = Pattern.compile("(\\{331:.{39})([0-9]{6})");
-        Matcher matcher = pattern.matcher(event);
+        Matcher matcher = pattern.matcher(messageData);
         if (matcher.find()) {
-            return matcher.group(2);
+            final String rawFirstMessageSentSequence = matcher.group(2);
+            return new Long(rawFirstMessageSentSequence).toString();
         } else {
             return null;
         }
     }
 
     private String extractLastMessageSentSequence(final String event) {
+        final String messageData = event.split("\\|")[33];
         Pattern pattern = Pattern.compile("(\\{331:.{45})([0-9]{6})");
-        Matcher matcher = pattern.matcher(event);
+        Matcher matcher = pattern.matcher(messageData);
         if (matcher.find()) {
-            return matcher.group(2);
+            final String rawLastMessageSentSequence = matcher.group(2);
+            return new Long(rawLastMessageSentSequence).toString();
         } else {
             return null;
         }
     }
 
     private String extractFirstMessageReceivedSequence(final String event) {
+        final String messageData = event.split("\\|")[33];
         Pattern pattern = Pattern.compile("(\\{331:.{51})([0-9]{6})");
-        Matcher matcher = pattern.matcher(event);
+        Matcher matcher = pattern.matcher(messageData);
         if (matcher.find()) {
-            return matcher.group(2);
+            final String rawFirstMessageReceivedSequence = matcher.group(2);
+            return new Long(rawFirstMessageReceivedSequence).toString();
         } else {
             return null;
         }
     }
 
     private String extractLastMessageReceivedSequence(final String event) {
+        final String messageData = event.split("\\|")[33];
         Pattern pattern = Pattern.compile("(\\{331:.{57})([0-9]{6})");
-        Matcher matcher = pattern.matcher(event);
+        Matcher matcher = pattern.matcher(messageData);
         if (matcher.find()) {
-            return matcher.group(2);
+            final String rawLastMessageReceivedSequence = matcher.group(2);
+            return new Long(rawLastMessageReceivedSequence).toString();
         } else {
             return null;
         }

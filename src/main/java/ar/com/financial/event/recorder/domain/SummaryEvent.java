@@ -52,8 +52,4 @@ public class SummaryEvent implements Serializable {
         this.lastMessageReceivedSequence = lastMessageReceivedSequence;
     }
 
-    public SummaryEventKey getKey() {
-        return new SummaryEventKey(localBic, session);
-    }
-
 }

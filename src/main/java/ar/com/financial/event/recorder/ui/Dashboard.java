@@ -90,6 +90,7 @@ public class Dashboard extends UI {
 
     private void addSummaryEventGridFilters(Grid<SummaryEvent> grid) {
         final GridCellFilter filter = new GridCellFilter(grid, SummaryEvent.class);
+        filter.setTextFilter("localBic", true, true);
         filter.setTextFilter("session", true, true);
         filter.setDateFilter("startSessionTime");
         filter.setDateFilter("endSessionTime");

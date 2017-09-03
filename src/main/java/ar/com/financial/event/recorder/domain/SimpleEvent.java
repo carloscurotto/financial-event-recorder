@@ -59,8 +59,4 @@ public class SimpleEvent implements Serializable {
         this.suffix = suffix;
     }
 
-    public SimpleEventKey getKey() {
-        return new SimpleEventKey(localBic, session, sequence);
-    }
-
 }

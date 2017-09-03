@@ -113,7 +113,8 @@ public class SNMPEventParser {
         Pattern pattern = Pattern.compile("(.+UMID )([A-Z]{1})([A-Z0-9]{11})([0-9]{1,3})");
         Matcher matcher = pattern.matcher(messageData);
         if (matcher.find()) {
-            return matcher.group(4);
+            final String rawType = matcher.group(4);
+            return new Integer(rawType).toString();
         } else {
             return null;
         }
@@ -124,7 +125,8 @@ public class SNMPEventParser {
         Pattern pattern = Pattern.compile("(.+UMID )(.+Suffix )([0-9]+)");
         Matcher matcher = pattern.matcher(messageData);
         if (matcher.find()) {
-            return matcher.group(3);
+            final String rawSuffix = matcher.group(3);
+            return new Long(rawSuffix).toString();
         } else {
             return null;
         }
@@ -136,15 +138,17 @@ public class SNMPEventParser {
             Pattern pattern = Pattern.compile("(.+UMID )(.+Suffix )([0-9]+)(:.+Session )([0-9]+)(, [A-Za-z]+ )([0-9]+)");
             Matcher matcher = pattern.matcher(messageData);
             if (matcher.find()) {
-                return matcher.group(5);
+                final String rawSession = matcher.group(5);
+                return new Integer(rawSession).toString();
             } else {
                 return null;
             }
         } else {
-                Pattern pattern = Pattern.compile("(\\{1:.{15})([0-9]{4})");
+            Pattern pattern = Pattern.compile("(\\{1:.{15})([0-9]{4})");
             Matcher matcher = pattern.matcher(messageData);
             if (matcher.find()) {
-                return matcher.group(2);
+                final String rawSession = matcher.group(2);
+                return new Integer(rawSession).toString();
             } else {
                 return null;
             }
@@ -157,7 +161,8 @@ public class SNMPEventParser {
             Pattern pattern = Pattern.compile("(.+UMID )(.+Suffix )([0-9]+)(:.+Session )([0-9]+)(, [A-Za-z]+ )([0-9]+)");
             Matcher matcher = pattern.matcher(messageData);
             if (matcher.find()) {
-                return matcher.group(7);
+                final String rawSequence = matcher.group(7);
+                return new Long(rawSequence).toString();
             } else {
                 return null;
             }
@@ -165,7 +170,8 @@ public class SNMPEventParser {
             Pattern pattern = Pattern.compile("(\\{1:.{15})([0-9]{4})([0-9]{6})");
             Matcher matcher = pattern.matcher(messageData);
             if (matcher.find()) {
-                return matcher.group(3);
+                final String rawSequence = matcher.group(3);
+                return new Long(rawSequence).toString();
             } else {
                 return null;
             }
@@ -184,8 +190,8 @@ public class SNMPEventParser {
     }
 
     private Date extractStartSessionTime(final CommandResponderEvent event) {
+        final String messageData = event.getPDU().getVariable(new OID("1.3.6.1.4.1.18494.2.1.9")).toString();
         try {
-            final String messageData = event.getPDU().getVariable(new OID("1.3.6.1.4.1.18494.2.1.9")).toString();
             Pattern pattern = Pattern.compile("(\\{331:.{4})([0-9]{10})");
             Matcher matcher = pattern.matcher(messageData);
             if (matcher.find()) {
@@ -201,8 +207,8 @@ public class SNMPEventParser {
     }
 
     private Date extractEndSessionTime(final CommandResponderEvent event) {
+        final String messageData = event.getPDU().getVariable(new OID("1.3.6.1.4.1.18494.2.1.9")).toString();
         try {
-            final String messageData = event.getPDU().getVariable(new OID("1.3.6.1.4.1.18494.2.1.9")).toString();
             Pattern pattern = Pattern.compile("(\\{331:.{14})([0-9]{10})");
             Matcher matcher = pattern.matcher(messageData);
             if (matcher.find()) {
@@ -222,7 +228,8 @@ public class SNMPEventParser {
         Pattern pattern = Pattern.compile("(\\{331:.{27})([0-9]{6})");
         Matcher matcher = pattern.matcher(messageData);
         if (matcher.find()) {
-            return matcher.group(2);
+            final String rawQuanityMessagesSent = matcher.group(2);
+            return new Integer(rawQuanityMessagesSent).toString();
         } else {
             return null;
         }
@@ -233,7 +240,8 @@ public class SNMPEventParser {
         Pattern pattern = Pattern.compile("(\\{331:.{33})([0-9]{6})");
         Matcher matcher = pattern.matcher(messageData);
         if (matcher.find()) {
-            return matcher.group(2);
+            final String rawQuantityMessagesReceived = matcher.group(2);
+            return new Integer(rawQuantityMessagesReceived).toString();
         } else {
             return null;
         }
@@ -244,7 +252,8 @@ public class SNMPEventParser {
         Pattern pattern = Pattern.compile("(\\{331:.{39})([0-9]{6})");
         Matcher matcher = pattern.matcher(messageData);
         if (matcher.find()) {
-            return matcher.group(2);
+            final String rawFirstMessageSentSequence = matcher.group(2);
+            return new Long(rawFirstMessageSentSequence).toString();
         } else {
             return null;
         }
@@ -255,7 +264,8 @@ public class SNMPEventParser {
         Pattern pattern = Pattern.compile("(\\{331:.{45})([0-9]{6})");
         Matcher matcher = pattern.matcher(messageData);
         if (matcher.find()) {
-            return matcher.group(2);
+            final String rawLastMessageSentSequence = matcher.group(2);
+            return new Long(rawLastMessageSentSequence).toString();
         } else {
             return null;
         }
@@ -266,7 +276,8 @@ public class SNMPEventParser {
         Pattern pattern = Pattern.compile("(\\{331:.{51})([0-9]{6})");
         Matcher matcher = pattern.matcher(messageData);
         if (matcher.find()) {
-            return matcher.group(2);
+            final String rawFirstMessageReceivedSequence = matcher.group(2);
+            return new Long(rawFirstMessageReceivedSequence).toString();
         } else {
             return null;
         }
@@ -277,7 +288,8 @@ public class SNMPEventParser {
         Pattern pattern = Pattern.compile("(\\{331:.{57})([0-9]{6})");
         Matcher matcher = pattern.matcher(messageData);
         if (matcher.find()) {
-            return matcher.group(2);
+            final String rawLastMessageReceivedSequence = matcher.group(2);
+            return new Long(rawLastMessageReceivedSequence).toString();
         } else {
             return null;
         }
