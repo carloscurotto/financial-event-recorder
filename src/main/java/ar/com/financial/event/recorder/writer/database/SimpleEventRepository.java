@@ -11,12 +11,13 @@ public interface SimpleEventRepository extends CrudRepository<SimpleEvent, Simpl
 
     List<SimpleEvent> findAll();
 
-
-    //List<SimpleEvent> findByLocalBicAndInputOutput(String localBic, String inputOutput);
-
     List<SimpleEvent> findByLocalBicAndOriginTimeBetweenAndInputOutput(String localBic,
                                                                        Date originTimeStart,
                                                                        Date originTimeEnd,
                                                                        String inputOutput);
+
+    List<SimpleEvent> findByLocalBicAndOriginTimeBetween(String localBic,
+                                                         Date originTimeStart,
+                                                         Date originTimeEnd);
 
 }

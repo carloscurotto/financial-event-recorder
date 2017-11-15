@@ -3,11 +3,12 @@ package ar.com.financial.event.recorder.ui;
 import ar.com.financial.event.recorder.EventSynchronizer;
 import ar.com.financial.event.recorder.domain.SimpleEvent;
 import ar.com.financial.event.recorder.domain.SummaryEvent;
+import ar.com.financial.event.recorder.ui.model.EventDetails;
+import ar.com.financial.event.recorder.ui.model.EventTypeQuantity;
 import ar.com.financial.event.recorder.writer.database.SimpleEventRepository;
 import ar.com.financial.event.recorder.writer.database.SummaryEventRepository;
 import com.vaadin.annotations.Theme;
 import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.data.provider.Query;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.ContentMode;
@@ -19,15 +20,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.gridutil.cell.GridCellFilter;
 
 import java.sql.Date;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @SpringUI
 @Theme("valo")
@@ -42,7 +41,9 @@ public class Dashboard extends UI {
     @Autowired
     private EventSynchronizer eventSynchronizer;
 
-    private Grid<SimpleEvent> simpleEventTabGrid = new Grid<>(SimpleEvent.class);
+    private Grid<EventTypeQuantity> simpleEventsByTypeGrid = new Grid<>(EventTypeQuantity.class);
+
+    private Grid<EventDetails> detailEventsGrid = new Grid<>(EventDetails.class);
 
     private Grid<SimpleEvent> simpleEventGrid = new Grid<>(SimpleEvent.class);
 
@@ -53,7 +54,7 @@ public class Dashboard extends UI {
         initializeGrids();
 
         simpleEventGrid.setSizeFull();
-        simpleEventTabGrid.setSizeFull();
+        //simpleEventsByTypeGrid.setSizeFull();
         summaryEventGrid.setSizeFull();
         //summaryEventGrid.setVisible(false);
 
@@ -85,6 +86,9 @@ public class Dashboard extends UI {
         VerticalLayout eventsByCategoryTab = createEventsByCategoryTab();
         tabsheet.addTab(eventsByCategoryTab, "Events By Category");
 
+        VerticalLayout detailEventsTab = createDetailEventsTab();
+        tabsheet.addTab(detailEventsTab, "Detail Events");
+
         content.addComponent(tabsheet);
 
         // Add footer controls
@@ -92,23 +96,103 @@ public class Dashboard extends UI {
         content.addComponent(horizontalLayout);
     }
 
-    private VerticalLayout createEventsByCategoryTab() {
+    private VerticalLayout createDetailEventsTab() {
         VerticalLayout tab = new VerticalLayout();
-        tab.addComponent(createEventsByCategorySearchCriteria());
-        addSimpleEventTabGridFooter(this.simpleEventTabGrid);
-        tab.addComponent(this.simpleEventTabGrid);
+        //this.detailEventsGrid.setItems(simpleEventRepository.findAll());
+        this.detailEventsGrid.setSizeFull();
+        tab.addComponent(createDetailEventsSearchCriteria());
+        this.detailEventsGrid.setColumnOrder("localBic", "sequence", "session", "inputOutput", "originTime", "remoteBic", "suffix", "type");
+        this.detailEventsGrid.setHeightByRows(8d);
+        tab.addComponent(this.detailEventsGrid);
         return tab;
     }
 
-    private void addSimpleEventTabGridFooter(final Grid<SimpleEvent> grid) {
-        FooterRow footer = grid.appendFooterRow();
-        FooterCell totalLabel = footer.getCell("sequence");
-        totalLabel.setHtml("<b>Quantity Results:</b>");
-        footer.getCell("originTime").setHtml(calculateTotal(grid.getDataProvider()));
-        /*
-        grid.getDataProvider().addDataProviderListener(event ->
-                footer.getCell("originTime").setHtml(calculateTotal(grid.getDataProvider())));
-        */
+    private Component createDetailEventsSearchCriteria() {
+        HorizontalLayout layout = new HorizontalLayout();
+
+        // Bic
+        layout.addComponent(new Label("BIC:"));
+
+        List<String> bics = new ArrayList<>();
+        bics.add("BBDEARBA");
+        bics.add("MARIARBA");
+
+        ComboBox<String> bicSelect = new ComboBox<>();
+        bicSelect.setItems(bics);
+        bicSelect.setValue(bics.get(0));
+        bicSelect.setItemCaptionGenerator(String::toString);
+        bicSelect.setEmptySelectionAllowed(false);
+
+        layout.addComponent(bicSelect);
+
+        // Day Start
+        layout.addComponent(new Label("Start:"));
+
+        DateField dateSelectStart = new DateField();
+        dateSelectStart.setValue(LocalDate.now());
+        dateSelectStart.setDateFormat("dd-MM-yyyy");
+        dateSelectStart.setPlaceholder("dd-MM-yyyy");
+        dateSelectStart.setTextFieldEnabled(false);
+
+        layout.addComponent(dateSelectStart);
+
+        // Day Start
+        layout.addComponent(new Label("End:"));
+
+        DateField dateSelectEnd = new DateField();
+        dateSelectEnd.setValue(LocalDate.now());
+        dateSelectEnd.setDateFormat("dd-MM-yyyy");
+        dateSelectEnd.setPlaceholder("dd-MM-yyyy");
+        dateSelectEnd.setTextFieldEnabled(false);
+
+        layout.addComponent(dateSelectEnd);
+
+        // Search
+        Button searchButton = new Button("Search");
+        searchButton.addClickListener(event -> {
+            final String bicSelected = bicSelect.getValue();
+            final LocalDate localDateSelectedStart = dateSelectStart.getValue();
+            final LocalDate localDateSelectedEnd = dateSelectEnd.getValue();
+
+            java.util.Date dateSelectedStart = Date.from(localDateSelectedStart.atTime(0, 0, 0).atZone(ZoneId.systemDefault()).toInstant());
+            java.util.Date dateSelectedEnd = Date.from(localDateSelectedEnd.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
+
+            List<SimpleEvent> items = this.simpleEventRepository.
+                    findByLocalBicAndOriginTimeBetween(bicSelected, dateSelectedStart, dateSelectedEnd);
+            System.out.println("Quantity items queried [" + items.size() + "]");
+
+            List<EventDetails> eventDetails = items.stream().map(item -> {
+                return new EventDetails(item.getLocalBic(), item.getSequence(), item.getSession(), item.getInputOutput(),
+                        item.getOriginTime(), item.getRemoteBic(), item.getSuffix(), item.getType());
+            }).collect(Collectors.toList());
+
+            /*
+            Map<String, EventTypeQuantity> eventTypesQuantity = new HashMap<>();
+            for (SimpleEvent item : items) {
+                EventTypeQuantity eventTypeQuantity = eventTypesQuantity.get(item.getType());
+                if (eventTypeQuantity == null) {
+                    eventTypeQuantity = new EventTypeQuantity(item.getType(), 1L);
+                } else {
+                    eventTypeQuantity.setQuantity(eventTypeQuantity.getQuantity() + 1L);
+                }
+                eventTypesQuantity.put(eventTypeQuantity.getType(), eventTypeQuantity);
+            }
+            */
+
+            this.detailEventsGrid.setItems(eventDetails);
+        });
+        layout.addComponent(searchButton);
+
+        return layout;
+    }
+
+    private VerticalLayout createEventsByCategoryTab() {
+        VerticalLayout tab = new VerticalLayout();
+        tab.addComponent(createEventsByCategorySearchCriteria());
+        this.simpleEventsByTypeGrid.setColumnOrder("type", "quantity");
+        this.simpleEventsByTypeGrid.setHeightByRows(8d);
+        tab.addComponent(this.simpleEventsByTypeGrid);
+        return tab;
     }
 
     private HorizontalLayout createEventsByCategorySearchCriteria() {
@@ -129,16 +213,27 @@ public class Dashboard extends UI {
 
         layout.addComponent(bicSelect);
 
-        // Day
-        layout.addComponent(new Label("Day:"));
+        // Day Start
+        layout.addComponent(new Label("Start:"));
 
-        DateField dateSelect = new DateField();
-        dateSelect.setValue(LocalDate.now());
-        dateSelect.setDateFormat("dd-MM-yyyy");
-        dateSelect.setPlaceholder("dd-MM-yyyy");
-        dateSelect.setTextFieldEnabled(false);
+        DateField dateSelectStart = new DateField();
+        dateSelectStart.setValue(LocalDate.now());
+        dateSelectStart.setDateFormat("dd-MM-yyyy");
+        dateSelectStart.setPlaceholder("dd-MM-yyyy");
+        dateSelectStart.setTextFieldEnabled(false);
 
-        layout.addComponent(dateSelect);
+        layout.addComponent(dateSelectStart);
+
+        // Day End
+        layout.addComponent(new Label("End:"));
+
+        DateField dateSelectEnd = new DateField();
+        dateSelectEnd.setValue(LocalDate.now());
+        dateSelectEnd.setDateFormat("dd-MM-yyyy");
+        dateSelectEnd.setPlaceholder("dd-MM-yyyy");
+        dateSelectEnd.setTextFieldEnabled(false);
+
+        layout.addComponent(dateSelectEnd);
 
         // I/O
         layout.addComponent(new Label("I/O:"));
@@ -159,37 +254,29 @@ public class Dashboard extends UI {
         Button searchButton = new Button("Search");
         searchButton.addClickListener(event -> {
             final String bicSelected = bicSelect.getValue();
-            final LocalDate dateSelected = dateSelect.getValue();
+            final LocalDate localDateSelectedStart = dateSelectStart.getValue();
+            final LocalDate localDateSelectedEnd = dateSelectEnd.getValue();
             final String ioSelected = ioSelect.getValue();
 
-            System.out.println("Bic Selected [" + bicSelected +
-                    "], Date Selected [" + dateSelected + "], IO Selected [" + ioSelected + "]");
-
-
-            java.util.Date dateSelectedStart = Date.from(dateSelected.atTime(0, 0, 0).atZone(ZoneId.systemDefault()).toInstant());
-            java.util.Date dateSelectedEnd = Date.from(dateSelected.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
-
-            /*
-            *
-            * LocalDateTime ldt = ...
-ZonedDateTime zdt = ldt.atZone(ZoneId.systemDefault());
-Date output = Date.from(zdt.toInstant());*/
-
-            //System.out.println("dateSelectedStart [" + dateSelectedStart + "]");
-
-            //final String dateSelectedEnd = dateSelected.atTime(23, 59, 59).toString();
-
-            //System.out.println("dateSelectedEnd [" + dateSelectedEnd + "]");
-
-            //DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            java.util.Date dateSelectedStart = Date.from(localDateSelectedStart.atTime(0, 0, 0).atZone(ZoneId.systemDefault()).toInstant());
+            java.util.Date dateSelectedEnd = Date.from(localDateSelectedEnd.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
 
             List<SimpleEvent> items = this.simpleEventRepository.
                     findByLocalBicAndOriginTimeBetweenAndInputOutput(bicSelected, dateSelectedStart, dateSelectedEnd, ioSelected);
             System.out.println("Quantity items queried [" + items.size() + "]");
 
-            this.simpleEventTabGrid.setItems(items);
+            Map<String, EventTypeQuantity> eventTypesQuantity = new HashMap<>();
+            for (SimpleEvent item : items) {
+                EventTypeQuantity eventTypeQuantity = eventTypesQuantity.get(item.getType());
+                if (eventTypeQuantity == null) {
+                    eventTypeQuantity = new EventTypeQuantity(item.getType(), 1L);
+                } else {
+                    eventTypeQuantity.setQuantity(eventTypeQuantity.getQuantity() + 1L);
+                }
+                eventTypesQuantity.put(eventTypeQuantity.getType(), eventTypeQuantity);
+            }
 
-            this.simpleEventTabGrid.getFooterRow(0).getCell("originTime").setHtml(calculateTotalItems(items));
+            this.simpleEventsByTypeGrid.setItems(eventTypesQuantity.values());
         });
         layout.addComponent(searchButton);
 
@@ -197,7 +284,7 @@ Date output = Date.from(zdt.toInstant());*/
     }
 
     private String calculateTotalItems(List<SimpleEvent> items) {
-        return "<b>" + items.size() + "</b>";
+        return "<b>Quantity Results: " + items.size() + "</b>";
     }
 
     private void addSimpleEventGridFooter(final Grid<SimpleEvent> grid) {
