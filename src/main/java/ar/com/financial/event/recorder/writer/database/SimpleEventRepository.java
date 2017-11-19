@@ -20,4 +20,7 @@ public interface SimpleEventRepository extends CrudRepository<SimpleEvent, Simpl
                                                          Date originTimeStart,
                                                          Date originTimeEnd);
 
+    List<SimpleEvent> findBySessionAndInputOutput(String session,
+                                                  String inputOutput);
+
 }

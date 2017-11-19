@@ -29,6 +29,7 @@ public class SummaryEvent implements Serializable {
     private String lastMessageSentSequence;
     private String firstMessageReceivedSequence;
     private String lastMessageReceivedSequence;
+    private String validation;
 
     SummaryEvent(final String localBic,
                  final String session,

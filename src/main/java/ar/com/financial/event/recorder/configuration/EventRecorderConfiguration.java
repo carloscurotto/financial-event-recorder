@@ -10,20 +10,19 @@ import ar.com.financial.event.recorder.writer.MultipleEventWriter;
 import ar.com.financial.event.recorder.writer.Writer;
 import ar.com.financial.event.recorder.writer.console.ConsoleSimpleEventWriter;
 import ar.com.financial.event.recorder.writer.console.ConsoleSummaryEventWriter;
-import ar.com.financial.event.recorder.writer.database.DatabaseSimpleEventWriter;
-import ar.com.financial.event.recorder.writer.database.DatabaseSummaryEventWriter;
-import ar.com.financial.event.recorder.writer.database.SimpleEventRepository;
-import ar.com.financial.event.recorder.writer.database.SummaryEventRepository;
+import ar.com.financial.event.recorder.writer.database.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.List;
 
 @Configuration
+@EnableTransactionManagement
 public class EventRecorderConfiguration {
 
     private static final String CONSOLE_WRITER_TYPE = "console";
@@ -94,9 +93,14 @@ public class EventRecorderConfiguration {
         if (type.equalsIgnoreCase(CONSOLE_WRITER_TYPE)) {
             return new MultipleEventWriter(createConsoleSimpleEventWriter(), createConsoleSummaryEventWriter());
         } else if (type.equalsIgnoreCase(DATABASE_WRITER_TYPE)) {
-            return new MultipleEventWriter(createDatabaseSimpleEventWriter(), createDatabaseSummaryEventWriter());
+            return new MultipleEventWriter(createDatabaseSimpleEventWriter(),
+                    createDatabaseSummaryEventWriter(), createDatabaseSummaryValidationWriter());
         }
         throw new RuntimeException(String.format("The event writer of type [%s] is not supported", type));
+    }
+
+    private Writer<RawEvent> createDatabaseSummaryValidationWriter() {
+        return new DatabaseSummaryValidationWriter(simpleEventRepository, summaryEventRepository);
     }
 
     private Writer<RawEvent> createConsoleSimpleEventWriter() {
