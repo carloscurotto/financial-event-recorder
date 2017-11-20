@@ -74,8 +74,8 @@ public class EventRecorderConfiguration {
     @Qualifier("recorder-event-reader")
     @Bean(initMethod = "start", destroyMethod = "stop")
     public Reader<RawEvent> createRecorderEventReader() {
-        return new FileEventReader(SYNCHRONIZER_EVENT_LOG, eventCodes);
-        //return new SNMPEventReader(snmpHost, snmpPort, eventCodes);
+        //return new FileEventReader(SYNCHRONIZER_EVENT_LOG, eventCodes);
+        return new SNMPEventReader(snmpHost, snmpPort, eventCodes);
     }
 
     @Qualifier("recorder-event-writer")
